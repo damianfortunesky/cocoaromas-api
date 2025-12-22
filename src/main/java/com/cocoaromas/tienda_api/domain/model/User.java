@@ -24,11 +24,32 @@ public class User {
 
     public User() {}
 
-    public Integer getId() { return id; }
-    public String getEmail() { return email; }
-    public String getFullName() { return fullName; }
-    public String getPhone() { return phone; }
-    public boolean isActive() { return active; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public List<Role> getRoles() { return roles; }
+    public Integer getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+    
 }
