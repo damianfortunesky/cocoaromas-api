@@ -1,9 +1,14 @@
 package com.cocoaromas.api.infrastructure.persistence.adapter.order;
 
+import com.cocoaromas.api.application.port.out.order.LoadCustomerOrdersPort;
 import com.cocoaromas.api.application.port.out.order.LoadProductsForOrderPort;
 import com.cocoaromas.api.application.port.out.order.SaveOrderPort;
 import com.cocoaromas.api.domain.order.CreatedOrder;
 import com.cocoaromas.api.domain.order.CreatedOrderItem;
+import com.cocoaromas.api.domain.order.CustomerOrderDetail;
+import com.cocoaromas.api.domain.order.CustomerOrderItemDetail;
+import com.cocoaromas.api.domain.order.CustomerOrderPage;
+import com.cocoaromas.api.domain.order.CustomerOrderSummary;
 import com.cocoaromas.api.infrastructure.persistence.entity.UserEntity;
 import com.cocoaromas.api.infrastructure.persistence.entity.catalog.ProductEntity;
 import com.cocoaromas.api.infrastructure.persistence.entity.order.OrderEntity;
@@ -11,11 +16,15 @@ import com.cocoaromas.api.infrastructure.persistence.entity.order.OrderItemEntit
 import com.cocoaromas.api.infrastructure.persistence.repository.UserJpaRepository;
 import com.cocoaromas.api.infrastructure.persistence.repository.catalog.ProductJpaRepository;
 import com.cocoaromas.api.infrastructure.persistence.repository.order.OrderJpaRepository;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OrderPersistenceAdapter implements LoadProductsForOrderPort, SaveOrderPort {
+public class OrderPersistenceAdapter implements LoadProductsForOrderPort, SaveOrderPort, LoadCustomerOrdersPort {
 
     private final ProductJpaRepository productJpaRepository;
     private final UserJpaRepository userJpaRepository;
@@ -90,5 +99,56 @@ public class OrderPersistenceAdapter implements LoadProductsForOrderPort, SaveOr
                         item.getSubtotal()
                 )).toList()
         );
+    }
+
+    @Override
+    public CustomerOrderPage findByUserId(Long userId, int page, int size) {
+        Page<OrderEntity> ordersPage = orderJpaRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
+
+        return new CustomerOrderPage(
+                ordersPage.getContent().stream().map(order -> new CustomerOrderSummary(
+                        order.getId(),
+                        order.getCreatedAt(),
+                        order.getStatus(),
+                        order.getTotal(),
+                        order.getPaymentMethod(),
+                        order.getItems().stream().mapToInt(OrderItemEntity::getQuantity).sum()
+                )).toList(),
+                ordersPage.getNumber(),
+                ordersPage.getSize(),
+                ordersPage.getTotalElements(),
+                ordersPage.getTotalPages()
+        );
+    }
+
+    @Override
+    public Optional<CustomerOrderDetail> findDetailById(Long orderId) {
+        return orderJpaRepository.findWithItemsById(orderId)
+                .map(order -> {
+                    BigDecimal subtotal = order.getItems().stream()
+                            .map(OrderItemEntity::getSubtotal)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal discounts = subtotal.subtract(order.getTotal());
+
+                    return new CustomerOrderDetail(
+                            order.getId(),
+                            order.getUser().getId(),
+                            order.getCreatedAt(),
+                            order.getStatus(),
+                            order.getPaymentMethod(),
+                            order.getTotal(),
+                            subtotal,
+                            discounts,
+                            order.getNotes(),
+                            order.getItems().stream().map(item -> new CustomerOrderItemDetail(
+                                    item.getProduct().getId(),
+                                    item.getProductName(),
+                                    item.getUnitPrice(),
+                                    item.getQuantity(),
+                                    item.getSubtotal(),
+                                    item.getProduct().getMainImageUrl()
+                            )).toList()
+                    );
+                });
     }
 }
