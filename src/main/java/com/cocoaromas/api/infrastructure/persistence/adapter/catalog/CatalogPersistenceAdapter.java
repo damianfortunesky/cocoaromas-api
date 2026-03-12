@@ -60,6 +60,7 @@ public class CatalogPersistenceAdapter implements LoadCatalogPort {
         Page<ProductEntity> result = productJpaRepository.findAll((root, criteriaQuery, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("visible")));
+            predicates.add(cb.isNull(root.get("deletedAt")));
 
             if (query.search() != null && !query.search().isBlank()) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + query.search().trim().toLowerCase() + "%"));
@@ -91,10 +92,10 @@ public class CatalogPersistenceAdapter implements LoadCatalogPort {
     @Override
     public Optional<ProductDetail> findProductDetailById(Long productId) {
         return productJpaRepository.findById(productId)
-                .filter(product -> Boolean.TRUE.equals(product.getVisible()))
+                .filter(product -> Boolean.TRUE.equals(product.getVisible()) && product.getDeletedAt() == null)
                 .map(product -> {
                     List<RelatedProduct> relatedProducts = productJpaRepository
-                            .findTop4ByVisibleTrueAndCategoryIdAndIdNotOrderByIdAsc(product.getCategory().getId(), product.getId())
+                            .findTop4ByVisibleTrueAndDeletedAtIsNullAndCategoryIdAndIdNotOrderByIdAsc(product.getCategory().getId(), product.getId())
                             .stream()
                             .map(this::toRelatedProduct)
                             .toList();
