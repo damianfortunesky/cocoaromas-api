@@ -25,3 +25,9 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:change-this-jwt-secret-with-at-least-32-characters}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+    issuer: ${JWT_ISSUER:cocoaromas-api}

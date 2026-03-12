@@ -18,9 +18,12 @@ src/main/java/com/cocoaromas/api
 ├── domain                    # Núcleo del dominio (sin dependencias de Spring)
 ├── application               # Casos de uso y puertos de entrada/salida
 │   ├── port/in
+│   ├── port/out
 │   └── service
 ├── infrastructure            # Configuraciones y adapters técnicos
-│   └── config
+│   ├── config
+│   ├── persistence
+│   └── security
 └── entrypoints/rest          # Controladores HTTP
 ```
 
@@ -46,13 +49,60 @@ Por defecto usa perfil `local`.
 - `DB_PASSWORD` (default: `YourStrong!Passw0rd`)
 - `DB_ENCRYPT` (default: `false`)
 
-## Endpoints de soporte
+## Variables JWT
+
+- `JWT_SECRET`: secreto usado para firmar/verificar JWT (mínimo 32 caracteres)
+- `JWT_EXPIRATION_SECONDS`: expiración del access token en segundos (default: `3600`)
+- `JWT_ISSUER`: issuer del token (default: `cocoaromas-api`)
+
+## Flujo de autenticación implementado
+
+1. `POST /api/v1/auth/login` recibe `emailOrUsername` + `password`.
+2. El caso de uso busca usuario por email o username en SQL Server.
+3. Se valida password con `PasswordEncoder`.
+4. Si es válido, se emite JWT (sin refresh token por ahora) con `sub=userId` y `role`.
+5. El frontend usa `Authorization: Bearer <token>`.
+6. `GET /api/v1/auth/me` devuelve el usuario autenticado actual.
+
+## Usuarios de prueba seed
+
+- `admin` / `Admin123!` (role: `admin`)
+- `owner` / `Owner123!` (role: `owner`)
+- `employee` / `Employee123!` (role: `employee`)
+- `client` / `Client123!` (role: `client`)
+
+También podés loguear con los emails `*@cocoaromas.local`.
+
+## Endpoints principales
 
 - Ping: `GET /api/v1/ping`
+- Auth Login: `POST /api/v1/auth/login`
+- Auth Me: `GET /api/v1/auth/me`
 - Swagger UI: `/swagger-ui.html`
 - OpenAPI JSON: `/v3/api-docs`
 - Actuator Health: `/actuator/health`
 - Prometheus: `/actuator/prometheus`
+
+## Probar auth con curl
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"emailOrUsername":"admin","password":"Admin123!"}'
+```
+
+Luego usar `accessToken`:
+
+```bash
+curl http://localhost:8080/api/v1/auth/me \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+## Swagger
+
+- Abrí `/swagger-ui.html`.
+- Usá `POST /api/v1/auth/login` con el payload indicado.
+- Botón **Authorize**: pegar `Bearer <TOKEN>` para probar `/api/v1/auth/me`.
 
 ## Docker
 

@@ -1,0 +1,7 @@
+package com.cocoaromas.api.application.service.auth;
+
+public class UnauthorizedException extends RuntimeException {
+    public UnauthorizedException(String message) {
+        super(message);
+    }
+}
