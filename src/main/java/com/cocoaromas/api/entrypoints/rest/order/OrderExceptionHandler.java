@@ -2,6 +2,8 @@ package com.cocoaromas.api.entrypoints.rest.order;
 
 import com.cocoaromas.api.application.service.order.InvalidOrderException;
 import com.cocoaromas.api.application.service.order.OrderItemNotFoundException;
+import com.cocoaromas.api.application.service.order.OrderNotFoundException;
+import com.cocoaromas.api.application.service.order.OrderOwnershipException;
 import com.cocoaromas.api.application.service.order.OrderValidationException;
 import com.cocoaromas.api.entrypoints.rest.order.OrderDtos.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,12 @@ public class OrderExceptionHandler {
     public ResponseEntity<ErrorResponse> handleProductNotFound(OrderItemNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("PRODUCT_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler({OrderNotFoundException.class, OrderOwnershipException.class})
+    public ResponseEntity<ErrorResponse> handleOrderNotFound(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("ORDER_NOT_FOUND", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
