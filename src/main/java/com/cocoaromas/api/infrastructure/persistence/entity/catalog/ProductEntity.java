@@ -1,15 +1,8 @@
 package com.cocoaromas.api.infrastructure.persistence.entity.catalog;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "products")
@@ -56,55 +49,55 @@ public class ProductEntity {
     @Column(name = "variants_json")
     private String variantsJson;
 
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "is_active", nullable = false)
+    private Boolean active;
 
-    public String getName() {
-        return name;
-    }
+    @Column(name = "is_available", nullable = false)
+    private Boolean available;
 
-    public String getShortDescription() {
-        return shortDescription;
-    }
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
 
-    public String getLongDescription() {
-        return longDescription;
-    }
+    @Column(name = "created_at", nullable = false)
+    private OffsetDateTime createdAt;
 
-    public BigDecimal getPrice() {
-        return price;
-    }
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
 
-    public CategoryEntity getCategory() {
-        return category;
-    }
-
-    public String getMainImageUrl() {
-        return mainImageUrl;
-    }
-
-    public String getImageUrlsJson() {
-        return imageUrlsJson;
-    }
-
-    public Integer getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public Boolean getVisible() {
-        return visible;
-    }
-
-    public Boolean getHasVariants() {
-        return hasVariants;
-    }
-
-    public String getAttributesJson() {
-        return attributesJson;
-    }
-
-    public String getVariantsJson() {
-        return variantsJson;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getShortDescription() { return shortDescription; }
+    public void setShortDescription(String shortDescription) { this.shortDescription = shortDescription; }
+    public String getLongDescription() { return longDescription; }
+    public void setLongDescription(String longDescription) { this.longDescription = longDescription; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    public CategoryEntity getCategory() { return category; }
+    public void setCategory(CategoryEntity category) { this.category = category; }
+    public String getMainImageUrl() { return mainImageUrl; }
+    public void setMainImageUrl(String mainImageUrl) { this.mainImageUrl = mainImageUrl; }
+    public String getImageUrlsJson() { return imageUrlsJson; }
+    public void setImageUrlsJson(String imageUrlsJson) { this.imageUrlsJson = imageUrlsJson; }
+    public Integer getStockQuantity() { return stockQuantity; }
+    public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
+    public Boolean getVisible() { return visible; }
+    public void setVisible(Boolean visible) { this.visible = visible; }
+    public Boolean getHasVariants() { return hasVariants; }
+    public void setHasVariants(Boolean hasVariants) { this.hasVariants = hasVariants; }
+    public String getAttributesJson() { return attributesJson; }
+    public void setAttributesJson(String attributesJson) { this.attributesJson = attributesJson; }
+    public String getVariantsJson() { return variantsJson; }
+    public void setVariantsJson(String variantsJson) { this.variantsJson = variantsJson; }
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
+    public Boolean getAvailable() { return available; }
+    public void setAvailable(Boolean available) { this.available = available; }
+    public OffsetDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(OffsetDateTime deletedAt) { this.deletedAt = deletedAt; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
