@@ -25,6 +25,9 @@ public class ProductEntity {
     @Column(name = "short_description", nullable = false, length = 280)
     private String shortDescription;
 
+    @Column(name = "long_description", length = 2000)
+    private String longDescription;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
@@ -34,6 +37,9 @@ public class ProductEntity {
 
     @Column(name = "main_image_url", nullable = false, length = 500)
     private String mainImageUrl;
+
+    @Column(name = "image_urls_json")
+    private String imageUrlsJson;
 
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
@@ -47,6 +53,9 @@ public class ProductEntity {
     @Column(name = "attributes_json")
     private String attributesJson;
 
+    @Column(name = "variants_json")
+    private String variantsJson;
+
     public Long getId() {
         return id;
     }
@@ -59,6 +68,10 @@ public class ProductEntity {
         return shortDescription;
     }
 
+    public String getLongDescription() {
+        return longDescription;
+    }
+
     public BigDecimal getPrice() {
         return price;
     }
@@ -69,6 +82,10 @@ public class ProductEntity {
 
     public String getMainImageUrl() {
         return mainImageUrl;
+    }
+
+    public String getImageUrlsJson() {
+        return imageUrlsJson;
     }
 
     public Integer getStockQuantity() {
@@ -85,5 +102,9 @@ public class ProductEntity {
 
     public String getAttributesJson() {
         return attributesJson;
+    }
+
+    public String getVariantsJson() {
+        return variantsJson;
     }
 }

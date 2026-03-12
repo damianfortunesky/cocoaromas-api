@@ -1,11 +1,14 @@
 package com.cocoaromas.api.entrypoints.rest.catalog;
 
 import com.cocoaromas.api.application.port.in.catalog.GetPublicCategoriesUseCase;
+import com.cocoaromas.api.application.port.in.catalog.GetPublicProductDetailUseCase;
 import com.cocoaromas.api.application.port.in.catalog.GetPublicProductsUseCase;
 import com.cocoaromas.api.domain.catalog.CatalogSortDirection;
 import com.cocoaromas.api.domain.catalog.CatalogSortField;
 import com.cocoaromas.api.domain.catalog.ProductCatalogQuery;
 import com.cocoaromas.api.entrypoints.rest.catalog.CatalogDtos.CategoryResponse;
+import com.cocoaromas.api.entrypoints.rest.catalog.CatalogDtos.ErrorResponse;
+import com.cocoaromas.api.entrypoints.rest.catalog.CatalogDtos.ProductDetailResponse;
 import com.cocoaromas.api.entrypoints.rest.catalog.CatalogDtos.ProductsPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,17 +32,20 @@ public class CatalogController {
 
     private final GetPublicProductsUseCase getPublicProductsUseCase;
     private final GetPublicCategoriesUseCase getPublicCategoriesUseCase;
+    private final GetPublicProductDetailUseCase getPublicProductDetailUseCase;
 
     public CatalogController(
             GetPublicProductsUseCase getPublicProductsUseCase,
-            GetPublicCategoriesUseCase getPublicCategoriesUseCase
+            GetPublicCategoriesUseCase getPublicCategoriesUseCase,
+            GetPublicProductDetailUseCase getPublicProductDetailUseCase
     ) {
         this.getPublicProductsUseCase = getPublicProductsUseCase;
         this.getPublicCategoriesUseCase = getPublicCategoriesUseCase;
+        this.getPublicProductDetailUseCase = getPublicProductDetailUseCase;
     }
 
     @GetMapping("/products")
-    @Operation(summary = "Lista productos públicos", description = "Soporta búsqueda, filtro por categoría, orden y paginación" , security = {})
+    @Operation(summary = "Lista productos públicos", description = "Soporta búsqueda, filtro por categoría, orden y paginación", security = {})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Listado obtenido", content = @Content(schema = @Schema(implementation = ProductsPageResponse.class)))
     })
@@ -67,8 +74,21 @@ public class CatalogController {
         return ProductsPageResponse.fromDomain(getPublicProductsUseCase.getProducts(query));
     }
 
+    @GetMapping("/products/{id}")
+    @Operation(summary = "Obtiene el detalle público de un producto", security = {})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Detalle obtenido", content = @Content(schema = @Schema(implementation = ProductDetailResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ProductDetailResponse getProductDetail(
+            @Parameter(description = "ID del producto", required = true)
+            @PathVariable Long id
+    ) {
+        return ProductDetailResponse.fromDomain(getPublicProductDetailUseCase.getProductDetail(id));
+    }
+
     @GetMapping("/categories")
-    @Operation(summary = "Lista categorías públicas" , security = {})
+    @Operation(summary = "Lista categorías públicas", security = {})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Listado obtenido", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CategoryResponse.class))))
     })
