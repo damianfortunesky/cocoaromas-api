@@ -22,3 +22,7 @@ spring:
 logging:
   level:
     '[org.hibernate.SQL]': warn
+
+app:
+  flyway:
+    auto-repair-on-validation-error: ${FLYWAY_AUTO_REPAIR_ON_VALIDATION_ERROR:true}

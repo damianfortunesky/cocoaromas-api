@@ -34,6 +34,9 @@ public class OrderItemEntity {
     @Column(name = "variant_id", length = 80)
     private String variantId;
 
+    @Column(name = "product_variant_id")
+    private Long productVariantId;
+
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
@@ -42,6 +45,15 @@ public class OrderItemEntity {
 
     @Column(name = "subtotal", nullable = false, precision = 12, scale = 2)
     private BigDecimal subtotal;
+
+    @Column(name = "discount_amount", nullable = false, precision = 12, scale = 2)
+    private BigDecimal discountAmount;
+
+    @Column(name = "tax_amount", nullable = false, precision = 12, scale = 2)
+    private BigDecimal taxAmount;
+
+    @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
+    private BigDecimal totalAmount;
 
     public Long getId() {
         return id;
@@ -83,6 +95,14 @@ public class OrderItemEntity {
         return quantity;
     }
 
+    public Long getProductVariantId() {
+        return productVariantId;
+    }
+
+    public void setProductVariantId(Long productVariantId) {
+        this.productVariantId = productVariantId;
+    }
+
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
@@ -101,5 +121,29 @@ public class OrderItemEntity {
 
     public void setSubtotal(BigDecimal subtotal) {
         this.subtotal = subtotal;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public BigDecimal getTaxAmount() {
+        return taxAmount;
+    }
+
+    public void setTaxAmount(BigDecimal taxAmount) {
+        this.taxAmount = taxAmount;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }
