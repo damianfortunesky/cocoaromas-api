@@ -28,9 +28,9 @@ springdoc:
 
 security:
   jwt:
-    secret: ${JWT_SECRET}
-    expiration-seconds: ${JWT_EXPIRATION_SECONDS}
-    issuer: ${JWT_ISSUER}
+    secret: ${JWT_SECRET:YxSlAjcAJTCimmUlRynCCkWtXRVMm7uMmKtE8vPXqVi}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+    issuer: ${JWT_ISSUER:cocoaromas-api}
 
 app:
   stock:
