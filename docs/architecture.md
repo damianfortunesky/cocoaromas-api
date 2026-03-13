@@ -30,3 +30,11 @@
 - **Adaptador de persistencia**: `AdminPromotionPersistenceAdapter` sobre `PromotionJpaRepository` con filtros, paginación y ordenamiento.
 - **Estrategia de borrado**: soft delete con columna `deleted_at`, para preservar historial y dejar base preparada para integración futura con carrito/checkout.
 - **Seguridad de promociones admin**: endpoints restringidos con `@PreAuthorize("hasRole('ADMIN')")` según reglas actuales.
+
+## Registro público de usuarios (Task 11)
+- **Entrypoint REST**: `AuthController` expone `POST /api/v1/auth/register`.
+- **Puerto de entrada**: `RegisterUseCase`.
+- **Servicio de aplicación**: `AuthService` valida datos mínimos, unicidad de email y fuerza rol `CLIENT`.
+- **Puerto de salida**: `RegisterUserPort`.
+- **Adaptador de persistencia**: `UserPersistenceAdapter` guarda `users` con password hasheada, nombre/apellido y `created_at`.
+- **Seguridad**: endpoint marcado como público en `SecurityConfig` para permitir onboarding sin token.
