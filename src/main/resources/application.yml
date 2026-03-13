@@ -31,3 +31,7 @@ security:
     secret: ${JWT_SECRET}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS}
     issuer: ${JWT_ISSUER}
+
+app:
+  stock:
+    low-threshold: ${STOCK_LOW_THRESHOLD:5}
