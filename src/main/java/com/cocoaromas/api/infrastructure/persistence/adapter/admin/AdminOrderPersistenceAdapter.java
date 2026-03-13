@@ -40,10 +40,7 @@ public class AdminOrderPersistenceAdapter implements ManageAdminOrdersPort {
 
             if (query.search() != null && !query.search().isBlank()) {
                 String like = "%" + query.search().trim().toLowerCase() + "%";
-                predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("user").get("name")), like),
-                        cb.like(cb.lower(root.get("user").get("email")), like)
-                ));
+                predicates.add(cb.like(cb.lower(root.get("user").get("email")), like));
             }
             if (query.status() != null) {
                 predicates.add(cb.equal(root.get("status"), query.status()));
@@ -94,7 +91,7 @@ public class AdminOrderPersistenceAdapter implements ManageAdminOrdersPort {
                 entity.getStatus(),
                 entity.getPaymentMethod(),
                 entity.getUser().getId(),
-                entity.getUser().getName(),
+                resolveCustomerName(entity),
                 entity.getUser().getEmail(),
                 entity.getTotal(),
                 entity.getItems().stream().mapToInt(OrderItemEntity::getQuantity).sum()
@@ -114,7 +111,7 @@ public class AdminOrderPersistenceAdapter implements ManageAdminOrdersPort {
                 entity.getStatus(),
                 entity.getPaymentMethod(),
                 entity.getUser().getId(),
-                entity.getUser().getName(),
+                resolveCustomerName(entity),
                 entity.getUser().getEmail(),
                 subtotal,
                 discounts,
@@ -129,6 +126,18 @@ public class AdminOrderPersistenceAdapter implements ManageAdminOrdersPort {
                         item.getProduct().getMainImageUrl()
                 )).toList()
         );
+    }
+
+
+    private String resolveCustomerName(OrderEntity entity) {
+        String email = entity.getUser().getEmail();
+        if (email == null || email.isBlank()) {
+            return "Cliente";
+        }
+
+        int atIndex = email.indexOf('@');
+        String localPart = atIndex > 0 ? email.substring(0, atIndex) : email;
+        return localPart.isBlank() ? email : localPart;
     }
 
     private String mapSort(String sortBy) {
