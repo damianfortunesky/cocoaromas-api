@@ -30,6 +30,8 @@ src/main/java/com/cocoaromas/api
 ## Ejecutar local
 
 ```bash
+cp .env.example .env
+set -a; source .env; set +a
 mvn spring-boot:run
 ```
 
@@ -44,9 +46,9 @@ Por defecto usa perfil `local`.
 
 - `DB_HOST` (default: `localhost` en local, `host.docker.internal` en docker)
 - `DB_PORT` (default: `1433`)
-- `DB_NAME` (default: `cocoaromas`)
-- `DB_USERNAME` (default: `sa`)
-- `DB_PASSWORD` (default: `YourStrong!Passw0rd`)
+- `DB_NAME` (default recomendado: `db_cocoaromas`)
+- `DB_USERNAME` (default recomendado: `sv_cocoaromas`)
+- `DB_PASSWORD` (default recomendado: `ApiUser123!`)
 - `DB_ENCRYPT` (default: `false`)
 
 ## Variables JWT
@@ -111,5 +113,7 @@ Levanta únicamente la API backend:
 ```bash
 docker compose up --build
 ```
+
+> El `docker-compose.yml` ya incluye variables DB/JWT para `db_cocoaromas`.
 
 > El SQL Server no se levanta en este compose porque se espera usar una instancia local existente.
