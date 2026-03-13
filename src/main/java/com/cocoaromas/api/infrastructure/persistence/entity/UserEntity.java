@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "users")
@@ -20,6 +21,12 @@ public class UserEntity {
 
     @Column(nullable = false, length = 120)
     private String name;
+
+    @Column(name = "first_name", nullable = false, length = 60)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 60)
+    private String lastName;
 
     @Column(nullable = false, unique = true, length = 120)
     private String email;
@@ -34,6 +41,9 @@ public class UserEntity {
     @Column(nullable = false, length = 30)
     private Role role;
 
+    @Column(name = "created_at", nullable = false)
+    private OffsetDateTime createdAt;
+
     public Long getId() {
         return id;
     }
@@ -46,6 +56,14 @@ public class UserEntity {
         return email;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -56,5 +74,41 @@ public class UserEntity {
 
     public Role getRole() {
         return role;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

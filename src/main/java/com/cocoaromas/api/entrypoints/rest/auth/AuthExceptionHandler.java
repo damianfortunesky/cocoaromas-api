@@ -1,6 +1,8 @@
 package com.cocoaromas.api.entrypoints.rest.auth;
 
 import com.cocoaromas.api.application.service.auth.InvalidCredentialsException;
+import com.cocoaromas.api.application.service.auth.EmailAlreadyRegisteredException;
+import com.cocoaromas.api.application.service.auth.RegisterValidationException;
 import com.cocoaromas.api.application.service.auth.UnauthorizedException;
 import com.cocoaromas.api.entrypoints.rest.auth.AuthDtos.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,17 @@ public class AuthExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("UNAUTHORIZED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyRegistered(EmailAlreadyRegisteredException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("EMAIL_ALREADY_REGISTERED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(RegisterValidationException.class)
+    public ResponseEntity<ErrorResponse> handleRegisterValidation(RegisterValidationException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse("VALIDATION_ERROR", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
