@@ -27,6 +27,7 @@ PATCH /api/v1/admin/stocks/{productId}
 
 ## Pedidos admin
 GET /api/v1/admin/orders
+GET /api/v1/admin/orders/{orderId}
 PATCH /api/v1/admin/orders/{orderId}/status
 
 ## Promociones
