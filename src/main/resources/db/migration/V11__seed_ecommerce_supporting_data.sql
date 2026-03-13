@@ -40,7 +40,8 @@ SELECT p.id,
        NULL,
        SYSDATETIMEOFFSET()
 FROM products p
-WHERE NOT EXISTS (
+WHERE p.stock_quantity <> 0
+  AND NOT EXISTS (
     SELECT 1
     FROM inventory_movements im
     WHERE im.product_id = p.id
