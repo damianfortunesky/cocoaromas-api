@@ -28,6 +28,6 @@ springdoc:
 
 security:
   jwt:
-    secret: ${JWT_SECRET:change-this-jwt-secret-with-at-least-32-characters}
-    expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
-    issuer: ${JWT_ISSUER:cocoaromas-api}
+    secret: ${JWT_SECRET}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS}
+    issuer: ${JWT_ISSUER}

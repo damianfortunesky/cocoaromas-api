@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:sqlserver://${DB_HOST:host.docker.internal}:${DB_PORT:1433};databaseName=${DB_NAME:cocoaromas};encrypt=${DB_ENCRYPT:false};trustServerCertificate=true
-    username: ${DB_USERNAME:sa}
-    password: ${DB_PASSWORD:YourStrong!Passw0rd}
+    url: jdbc:sqlserver://${DB_HOST:host.docker.internal}:${DB_PORT:1433};databaseName=${DB_NAME:db_cocoaromas};encrypt=${DB_ENCRYPT:false};trustServerCertificate=true
+    username: ${DB_USERNAME:sv_cocoaromas}
+    password: ${DB_PASSWORD:ApiUser123!}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
@@ -11,7 +11,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.SQLServerDialect
-        format_sql: false
+        '[format_sql]': false
   flyway:
     enabled: true
   sql:
@@ -20,4 +20,4 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: info
+    '[org.hibernate.SQL]': info
