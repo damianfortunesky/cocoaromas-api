@@ -10,6 +10,7 @@ CREATE TABLE orders (
     CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+GO
 CREATE TABLE order_items (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     order_id BIGINT NOT NULL,
@@ -23,6 +24,7 @@ CREATE TABLE order_items (
     CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+GO
 CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_order_items_order_id ON order_items(order_id);
