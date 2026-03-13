@@ -1,19 +1,34 @@
-ALTER TABLE users ADD first_name NVARCHAR(60) NULL;
-ALTER TABLE users ADD last_name NVARCHAR(60) NULL;
-ALTER TABLE users ADD created_at DATETIMEOFFSET NULL;
+IF COL_LENGTH('users', 'is_active') IS NULL
+BEGIN
+    ALTER TABLE users ADD is_active BIT NOT NULL CONSTRAINT df_users_is_active DEFAULT 1;
+END;
 
-UPDATE users
-SET first_name = CASE
-        WHEN CHARINDEX(' ', name) > 0 THEN LEFT(name, CHARINDEX(' ', name) - 1)
-        ELSE name
-    END,
-    last_name = CASE
-        WHEN CHARINDEX(' ', name) > 0 THEN LTRIM(SUBSTRING(name, CHARINDEX(' ', name) + 1, LEN(name)))
-        ELSE name
-    END,
-    created_at = SYSDATETIMEOFFSET()
-WHERE first_name IS NULL OR last_name IS NULL OR created_at IS NULL;
+IF COL_LENGTH('users', 'created_at') IS NULL
+BEGIN
+    ALTER TABLE users ADD created_at DATETIMEOFFSET NOT NULL CONSTRAINT df_users_created_at DEFAULT SYSDATETIMEOFFSET();
+END;
 
-ALTER TABLE users ALTER COLUMN first_name NVARCHAR(60) NOT NULL;
-ALTER TABLE users ALTER COLUMN last_name NVARCHAR(60) NOT NULL;
-ALTER TABLE users ALTER COLUMN created_at DATETIMEOFFSET NOT NULL;
+IF COL_LENGTH('users', 'updated_at') IS NULL
+BEGIN
+    ALTER TABLE users ADD updated_at DATETIMEOFFSET NOT NULL CONSTRAINT df_users_updated_at DEFAULT SYSDATETIMEOFFSET();
+END;
+
+IF COL_LENGTH('users', 'name') IS NOT NULL
+BEGIN
+    ALTER TABLE users DROP COLUMN name;
+END;
+
+IF COL_LENGTH('users', 'username') IS NOT NULL
+BEGIN
+    ALTER TABLE users DROP COLUMN username;
+END;
+
+IF COL_LENGTH('users', 'first_name') IS NOT NULL
+BEGIN
+    ALTER TABLE users DROP COLUMN first_name;
+END;
+
+IF COL_LENGTH('users', 'last_name') IS NOT NULL
+BEGIN
+    ALTER TABLE users DROP COLUMN last_name;
+END;

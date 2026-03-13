@@ -42,13 +42,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login por email o username")
+    @Operation(summary = "Login por email")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login exitoso"),
             @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
     })
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        return LoginResponse.fromDomain(loginUseCase.login(request.emailOrUsername(), request.password()));
+        return LoginResponse.fromDomain(loginUseCase.login(request.email(), request.password()));
     }
 
     @PostMapping("/register")

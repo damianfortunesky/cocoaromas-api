@@ -42,15 +42,15 @@ class AuthControllerTest {
 
     @Test
     void shouldLoginSuccessfully() throws Exception {
-        AuthenticatedUser user = new AuthenticatedUser(1L, "Admin User", "admin@cocoaromas.local", Role.ADMIN);
-        given(loginUseCase.login("admin", "Admin123!"))
+        AuthenticatedUser user = new AuthenticatedUser(1L, "admin@cocoaromas.local", Role.ADMIN);
+        given(loginUseCase.login("admin@cocoaromas.local", "Admin123!"))
                 .willReturn(new AuthToken("token-value", "Bearer", 3600, user));
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "emailOrUsername": "admin",
+                                  "email": "admin@cocoaromas.local",
                                   "password": "Admin123!"
                                 }
                                 """))
@@ -64,7 +64,7 @@ class AuthControllerTest {
     @Test
     void shouldReturnAuthenticatedUser() throws Exception {
         given(getCurrentUserUseCase.getCurrentUser())
-                .willReturn(new AuthenticatedUser(2L, "Employee User", "employee@cocoaromas.local", Role.EMPLOYEE));
+                .willReturn(new AuthenticatedUser(2L, "employee@cocoaromas.local", Role.EMPLOYEE));
 
         mockMvc.perform(get("/api/v1/auth/me"))
                 .andExpect(status().isOk())
@@ -75,16 +75,14 @@ class AuthControllerTest {
 
     @Test
     void shouldRegisterClientSuccessfully() throws Exception {
-        given(registerUseCase.register(new RegisterCommand("Ana", "Perez", "ana@cocoaromas.local", "Ana12345")))
-                .willReturn(new RegisteredUser(10L, "Ana", "Perez", "ana@cocoaromas.local", Role.CLIENT,
+        given(registerUseCase.register(new RegisterCommand("ana@cocoaromas.local", "Ana12345")))
+                .willReturn(new RegisteredUser(10L, "ana@cocoaromas.local", Role.CLIENT,
                         OffsetDateTime.parse("2026-01-01T10:00:00Z")));
 
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "firstName": "Ana",
-                                  "lastName": "Perez",
                                   "email": "ana@cocoaromas.local",
                                   "password": "Ana12345"
                                 }
@@ -98,15 +96,13 @@ class AuthControllerTest {
 
     @Test
     void shouldReturnConflictWhenEmailAlreadyRegistered() throws Exception {
-        given(registerUseCase.register(new RegisterCommand("Ana", "Perez", "ana@cocoaromas.local", "Ana12345")))
+        given(registerUseCase.register(new RegisterCommand("ana@cocoaromas.local", "Ana12345")))
                 .willThrow(new EmailAlreadyRegisteredException("ana@cocoaromas.local"));
 
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "firstName": "Ana",
-                                  "lastName": "Perez",
                                   "email": "ana@cocoaromas.local",
                                   "password": "Ana12345"
                                 }

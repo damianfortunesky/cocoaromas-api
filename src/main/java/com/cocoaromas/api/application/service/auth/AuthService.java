@@ -49,12 +49,8 @@ public class AuthService implements LoginUseCase, GetCurrentUserUseCase, Registe
         }
 
         String passwordHash = passwordHasherPort.encode(command.password());
-        String username = buildUsername(normalizedEmail);
         return registerUserPort.save(new UserToRegister(
-                command.firstName().trim(),
-                command.lastName().trim(),
                 normalizedEmail,
-                username,
                 passwordHash,
                 Role.CLIENT
         ));
@@ -62,7 +58,7 @@ public class AuthService implements LoginUseCase, GetCurrentUserUseCase, Registe
 
     @Override
     public AuthToken login(String identifier, String password) {
-        User user = loadUserPort.findByEmailOrUsername(identifier)
+        User user = loadUserPort.findByEmail(identifier)
                 .orElseThrow(InvalidCredentialsException::new);
 
         if (!passwordHasherPort.matches(password, user.passwordHash())) {
@@ -74,7 +70,7 @@ public class AuthService implements LoginUseCase, GetCurrentUserUseCase, Registe
                 accessToken,
                 "Bearer",
                 tokenProviderPort.getAccessTokenExpirationSeconds(),
-                new AuthenticatedUser(user.id(), user.name(), user.email(), user.role())
+                new AuthenticatedUser(user.id(), user.email(), user.role())
         );
     }
 
@@ -88,32 +84,15 @@ public class AuthService implements LoginUseCase, GetCurrentUserUseCase, Registe
         User user = loadUserPort.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("Usuario autenticado no encontrado"));
 
-        return new AuthenticatedUser(user.id(), user.name(), user.email(), user.role());
+        return new AuthenticatedUser(user.id(), user.email(), user.role());
     }
 
     private void validate(RegisterCommand command) {
-        if (command.firstName() == null || command.firstName().isBlank()) {
-            throw new RegisterValidationException("El nombre es obligatorio");
-        }
-        if (command.lastName() == null || command.lastName().isBlank()) {
-            throw new RegisterValidationException("El apellido es obligatorio");
-        }
         if (command.password() == null || command.password().isBlank()) {
             throw new RegisterValidationException("La password es obligatoria");
         }
         if (command.password().length() < 8) {
             throw new RegisterValidationException("La password debe tener al menos 8 caracteres");
         }
-    }
-
-    private String buildUsername(String email) {
-        String localPart = email.contains("@") ? email.substring(0, email.indexOf('@')) : email;
-        String normalized = localPart.trim().toLowerCase().replaceAll("[^a-z0-9._-]", "");
-        if (normalized.isBlank()) {
-            normalized = "client";
-        }
-        String suffix = Integer.toHexString(email.hashCode());
-        String base = normalized.length() > 70 ? normalized.substring(0, 70) : normalized;
-        return base + "_" + suffix;
     }
 }
