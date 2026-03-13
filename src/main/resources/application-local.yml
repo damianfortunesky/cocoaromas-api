@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:sqlserver://${DB_HOST}:${DB_PORT};databaseName=${DB_NAME};encrypt=${DB_ENCRYPT};trustServerCertificate=true
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:sqlserver://${DB_HOST:localhost}:${DB_PORT:1433};databaseName=${DB_NAME:db_cocoaromas};encrypt=${DB_ENCRYPT:false};trustServerCertificate=true
+    username: ${DB_USERNAME:sv_cocoaromas}
+    password: ${DB_PASSWORD:ApiUser123!}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
