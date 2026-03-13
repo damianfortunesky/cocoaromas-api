@@ -21,8 +21,8 @@ public class UserPersistenceAdapter implements LoadUserPort, RegisterUserPort {
     }
 
     @Override
-    public Optional<User> findByEmailOrUsername(String identifier) {
-        return userJpaRepository.findByEmailIgnoreCaseOrUsernameIgnoreCase(identifier, identifier)
+    public Optional<User> findByEmail(String email) {
+        return userJpaRepository.findByEmailIgnoreCase(email)
                 .map(this::toDomain);
     }
 
@@ -39,15 +39,14 @@ public class UserPersistenceAdapter implements LoadUserPort, RegisterUserPort {
 
     @Override
     public RegisteredUser save(UserToRegister userToRegister) {
+        OffsetDateTime now = OffsetDateTime.now();
         UserEntity entity = new UserEntity();
-        entity.setFirstName(userToRegister.firstName());
-        entity.setLastName(userToRegister.lastName());
-        entity.setName(userToRegister.firstName() + " " + userToRegister.lastName());
         entity.setEmail(userToRegister.email());
-        entity.setUsername(userToRegister.username());
         entity.setPasswordHash(userToRegister.passwordHash());
         entity.setRole(userToRegister.role());
-        entity.setCreatedAt(OffsetDateTime.now());
+        entity.setActive(true);
+        entity.setCreatedAt(now);
+        entity.setUpdatedAt(now);
 
         return toRegisteredUser(userJpaRepository.save(entity));
     }
@@ -55,19 +54,16 @@ public class UserPersistenceAdapter implements LoadUserPort, RegisterUserPort {
     private User toDomain(UserEntity entity) {
         return new User(
                 entity.getId(),
-                entity.getName(),
                 entity.getEmail(),
-                entity.getUsername(),
                 entity.getPasswordHash(),
-                entity.getRole()
+                entity.getRole(),
+                entity.isActive()
         );
     }
 
     private RegisteredUser toRegisteredUser(UserEntity entity) {
         return new RegisteredUser(
                 entity.getId(),
-                entity.getFirstName(),
-                entity.getLastName(),
                 entity.getEmail(),
                 entity.getRole(),
                 entity.getCreatedAt()

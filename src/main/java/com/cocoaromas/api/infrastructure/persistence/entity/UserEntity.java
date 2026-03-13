@@ -19,20 +19,8 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 120)
-    private String name;
-
-    @Column(name = "first_name", nullable = false, length = 60)
-    private String firstName;
-
-    @Column(name = "last_name", nullable = false, length = 60)
-    private String lastName;
-
     @Column(nullable = false, unique = true, length = 120)
     private String email;
-
-    @Column(nullable = false, unique = true, length = 80)
-    private String username;
 
     @Column(name = "password_hash", nullable = false, length = 120)
     private String passwordHash;
@@ -41,31 +29,21 @@ public class UserEntity {
     @Column(nullable = false, length = 30)
     private Role role;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean active;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
 
     public Long getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public String getEmail() {
         return email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getUsername() {
-        return username;
     }
 
     public String getPasswordHash() {
@@ -76,28 +54,20 @@ public class UserEntity {
         return role;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public void setPasswordHash(String passwordHash) {
@@ -108,7 +78,15 @@ public class UserEntity {
         this.role = role;
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

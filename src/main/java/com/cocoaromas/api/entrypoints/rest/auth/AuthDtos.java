@@ -17,14 +17,12 @@ public final class AuthDtos {
     }
 
     public record LoginRequest(
-            @NotBlank(message = "emailOrUsername es requerido") String emailOrUsername,
+            @NotBlank(message = "email es requerido") @Email(message = "email inválido") String email,
             @NotBlank(message = "password es requerido") String password
     ) {
     }
 
     public record RegisterRequest(
-            @NotBlank(message = "firstName es requerido") String firstName,
-            @NotBlank(message = "lastName es requerido") String lastName,
             @NotBlank(message = "email es requerido") @Email(message = "email inválido") String email,
             @NotBlank(message = "password es requerido")
             @Size(min = 8, max = 72, message = "password debe tener entre 8 y 72 caracteres")
@@ -34,14 +32,12 @@ public final class AuthDtos {
             ) String password
     ) {
         public RegisterCommand toCommand() {
-            return new RegisterCommand(firstName, lastName, email, password);
+            return new RegisterCommand(email, password);
         }
     }
 
     public record RegisterResponse(
             @Schema(example = "12") Long id,
-            @Schema(example = "Ana") String firstName,
-            @Schema(example = "Pérez") String lastName,
             @Schema(example = "ana.perez@example.com") String email,
             @Schema(example = "client") String role,
             OffsetDateTime createdAt
@@ -49,8 +45,6 @@ public final class AuthDtos {
         public static RegisterResponse fromDomain(RegisteredUser registeredUser) {
             return new RegisterResponse(
                     registeredUser.id(),
-                    registeredUser.firstName(),
-                    registeredUser.lastName(),
                     registeredUser.email(),
                     registeredUser.role().name().toLowerCase(),
                     registeredUser.createdAt()
@@ -58,9 +52,9 @@ public final class AuthDtos {
         }
     }
 
-    public record AuthUserResponse(Long id, String name, String email, String role) {
+    public record AuthUserResponse(Long id, String email, String role) {
         public static AuthUserResponse fromDomain(AuthenticatedUser user) {
-            return new AuthUserResponse(user.id(), user.name(), user.email(), user.role().name().toLowerCase());
+            return new AuthUserResponse(user.id(), user.email(), user.role().name().toLowerCase());
         }
     }
 
