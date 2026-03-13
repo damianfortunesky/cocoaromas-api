@@ -50,6 +50,21 @@ public class OrderEntity {
     @Column(name = "total", nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
 
+    @Column(name = "currency_code", nullable = false, length = 3)
+    private String currencyCode;
+
+    @Column(name = "subtotal", nullable = false, precision = 12, scale = 2)
+    private BigDecimal subtotal;
+
+    @Column(name = "discount_total", nullable = false, precision = 12, scale = 2)
+    private BigDecimal discountTotal;
+
+    @Column(name = "shipping_total", nullable = false, precision = 12, scale = 2)
+    private BigDecimal shippingTotal;
+
+    @Column(name = "payment_status", nullable = false, length = 30)
+    private String paymentStatus;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -121,6 +136,46 @@ public class OrderEntity {
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(BigDecimal subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public BigDecimal getDiscountTotal() {
+        return discountTotal;
+    }
+
+    public void setDiscountTotal(BigDecimal discountTotal) {
+        this.discountTotal = discountTotal;
+    }
+
+    public BigDecimal getShippingTotal() {
+        return shippingTotal;
+    }
+
+    public void setShippingTotal(BigDecimal shippingTotal) {
+        this.shippingTotal = shippingTotal;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     public void setCreatedAt(OffsetDateTime createdAt) {
