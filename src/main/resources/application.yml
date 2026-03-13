@@ -32,6 +32,9 @@ security:
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
     issuer: ${JWT_ISSUER:cocoaromas-api}
 
+
 app:
   stock:
     low-threshold: ${STOCK_LOW_THRESHOLD:5}
+  flyway:
+    auto-repair-on-validation-error: ${FLYWAY_AUTO_REPAIR_ON_VALIDATION_ERROR:false}

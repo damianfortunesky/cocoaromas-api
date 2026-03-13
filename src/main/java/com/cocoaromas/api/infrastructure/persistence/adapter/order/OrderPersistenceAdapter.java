@@ -26,6 +26,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderPersistenceAdapter implements LoadProductsForOrderPort, SaveOrderPort, LoadCustomerOrdersPort {
 
+    private static final String DEFAULT_CURRENCY_CODE = "ARS";
+    private static final String DEFAULT_PAYMENT_STATUS = "PENDING";
+
     private final ProductJpaRepository productJpaRepository;
     private final UserJpaRepository userJpaRepository;
     private final OrderJpaRepository orderJpaRepository;
@@ -66,6 +69,11 @@ public class OrderPersistenceAdapter implements LoadProductsForOrderPort, SaveOr
         orderEntity.setNotes(order.notes());
         orderEntity.setDeliveryMethod(order.deliveryMethod());
         orderEntity.setTotal(order.total());
+        orderEntity.setCurrencyCode(DEFAULT_CURRENCY_CODE);
+        orderEntity.setSubtotal(order.total());
+        orderEntity.setDiscountTotal(BigDecimal.ZERO);
+        orderEntity.setShippingTotal(BigDecimal.ZERO);
+        orderEntity.setPaymentStatus(DEFAULT_PAYMENT_STATUS);
         orderEntity.setCreatedAt(OffsetDateTime.now());
 
         for (OrderItemToSave item : order.items()) {
@@ -79,6 +87,9 @@ public class OrderPersistenceAdapter implements LoadProductsForOrderPort, SaveOr
             itemEntity.setQuantity(item.quantity());
             itemEntity.setUnitPrice(item.unitPrice());
             itemEntity.setSubtotal(item.subtotal());
+            itemEntity.setDiscountAmount(BigDecimal.ZERO);
+            itemEntity.setTaxAmount(BigDecimal.ZERO);
+            itemEntity.setTotalAmount(item.subtotal());
             orderEntity.addItem(itemEntity);
         }
 
