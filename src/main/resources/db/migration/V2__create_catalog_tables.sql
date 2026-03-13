@@ -4,6 +4,7 @@ CREATE TABLE categories (
     name NVARCHAR(120) NOT NULL,
     display_order INT NOT NULL DEFAULT 0
 );
+GO
 
 CREATE TABLE products (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -18,6 +19,7 @@ CREATE TABLE products (
     attributes_json NVARCHAR(MAX) NULL,
     CONSTRAINT fk_products_category FOREIGN KEY (category_id) REFERENCES categories(id)
 );
+GO
 
 CREATE INDEX idx_products_name ON products(name);
 CREATE INDEX idx_products_category ON products(category_id);

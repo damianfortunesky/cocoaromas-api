@@ -20,5 +20,6 @@ CREATE TABLE user_details (
     CONSTRAINT uq_user_details_user UNIQUE (user_id),
     CONSTRAINT ck_user_details_country_code_len CHECK (country_code IS NULL OR LEN(country_code) = 2)
 );
+GO
 
 CREATE INDEX idx_user_details_user_id ON user_details(user_id);

@@ -17,6 +17,7 @@ CREATE TABLE promotions (
     CONSTRAINT fk_promotions_product FOREIGN KEY (product_id) REFERENCES products(id),
     CONSTRAINT fk_promotions_category FOREIGN KEY (category_id) REFERENCES categories(id)
 );
+GO
 
 CREATE INDEX idx_promotions_active ON promotions(is_active);
 CREATE INDEX idx_promotions_type ON promotions(promotion_type);

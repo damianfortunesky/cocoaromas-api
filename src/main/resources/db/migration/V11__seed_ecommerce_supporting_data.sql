@@ -1,1 +1,0 @@
--- Seed removido intencionalmente: el modelo inicia vacío para poblar vía API.

@@ -3,12 +3,14 @@ BEGIN
     ALTER TABLE users
     ADD is_active BIT NOT NULL CONSTRAINT df_users_is_active_v13 DEFAULT 1 WITH VALUES;
 END;
+GO
 
 IF COL_LENGTH('users', 'created_at') IS NULL
 BEGIN
     ALTER TABLE users
     ADD created_at DATETIMEOFFSET NOT NULL CONSTRAINT df_users_created_at_v13 DEFAULT SYSDATETIMEOFFSET() WITH VALUES;
 END;
+GO
 
 IF COL_LENGTH('users', 'updated_at') IS NULL
 BEGIN
