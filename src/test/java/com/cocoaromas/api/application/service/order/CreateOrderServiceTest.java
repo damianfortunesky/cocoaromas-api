@@ -3,6 +3,8 @@ package com.cocoaromas.api.application.service.order;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.cocoaromas.api.application.port.out.order.LoadProductsForOrderPort;
 import com.cocoaromas.api.application.port.out.order.SaveOrderPort;
@@ -72,5 +74,40 @@ class CreateOrderServiceTest {
     void shouldFailWhenItemListIsEmpty() {
         assertThatThrownBy(() -> createOrderService.createOrder(new CreateOrderCommand(1L, List.of(), PaymentMethod.TRANSFER, null, null)))
                 .isInstanceOf(OrderValidationException.class);
+    }
+
+    @Test
+    void shouldLoadProductOnlyOnceWhenSameProductHasMultipleVariants() {
+        given(loadProductsForOrderPort.findById(1L)).willReturn(java.util.Optional.of(
+                new LoadProductsForOrderPort.ProductForOrder(
+                        1L,
+                        "Sahumerio",
+                        new BigDecimal("3500.00"),
+                        10,
+                        true,
+                        "[{\"id\":\"v1\",\"available\":true},{\"id\":\"v2\",\"available\":true}]",
+                        true)
+        ));
+        given(saveOrderPort.save(orderCaptor.capture())).willReturn(new CreatedOrder(
+                90L,
+                OrderStatus.PENDIENTE,
+                new BigDecimal("7000.00"),
+                OffsetDateTime.now(),
+                PaymentMethod.MERCADO_PAGO,
+                List.of()
+        ));
+
+        createOrderService.createOrder(new CreateOrderCommand(
+                5L,
+                List.of(
+                        new CreateOrderItem(1L, 1, "v1"),
+                        new CreateOrderItem(1L, 1, "v2")
+                ),
+                PaymentMethod.MERCADO_PAGO,
+                null,
+                null
+        ));
+
+        verify(loadProductsForOrderPort, times(1)).findById(1L);
     }
 }
