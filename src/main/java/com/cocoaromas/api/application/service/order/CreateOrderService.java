@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,7 @@ public class CreateOrderService implements CreateOrderUseCase {
 
         List<SaveOrderPort.OrderItemToSave> items = new ArrayList<>();
         Set<String> dedup = new LinkedHashSet<>();
+        Map<Long, LoadProductsForOrderPort.ProductForOrder> productsById = new HashMap<>();
         BigDecimal total = BigDecimal.ZERO;
 
         for (CreateOrderItem item : command.items()) {
@@ -63,8 +65,11 @@ public class CreateOrderService implements CreateOrderUseCase {
                 throw new OrderValidationException("Hay ítems repetidos para el mismo producto/variante");
             }
 
-            LoadProductsForOrderPort.ProductForOrder product = loadProductsForOrderPort.findById(item.productId())
-                    .orElseThrow(() -> new OrderItemNotFoundException(item.productId()));
+            LoadProductsForOrderPort.ProductForOrder product = productsById.computeIfAbsent(
+                    item.productId(),
+                    productId -> loadProductsForOrderPort.findById(productId)
+                            .orElseThrow(() -> new OrderItemNotFoundException(productId))
+            );
 
             if (!product.visible()) {
                 throw new OrderValidationException("Producto no disponible para compra: " + product.id());
