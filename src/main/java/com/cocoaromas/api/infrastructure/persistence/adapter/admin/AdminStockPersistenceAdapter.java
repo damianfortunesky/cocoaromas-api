@@ -102,7 +102,6 @@ public class AdminStockPersistenceAdapter implements ManageAdminStocksPort {
                 .orElseThrow(() -> new AdminProductNotFoundException(productId));
 
         entity.setStockQuantity(newStockQuantity);
-        entity.setAvailable(newStockQuantity > 0);
         entity.setUpdatedAt(java.time.OffsetDateTime.now());
 
         ProductEntity saved = productJpaRepository.save(entity);
@@ -135,8 +134,7 @@ public class AdminStockPersistenceAdapter implements ManageAdminStocksPort {
                 quantity,
                 available,
                 quantity > 0 && quantity <= lowStockThreshold,
-                Boolean.TRUE.equals(entity.getHasVariants()),
-                entity.getMainImageUrl()
+                entity.getImageUrl()
         );
     }
 
@@ -151,8 +149,7 @@ public class AdminStockPersistenceAdapter implements ManageAdminStocksPort {
                 quantity,
                 available,
                 quantity > 0 && quantity <= lowStockThreshold,
-                Boolean.TRUE.equals(entity.getHasVariants()),
-                entity.getMainImageUrl(),
+                entity.getImageUrl(),
                 entity.getUpdatedAt()
         );
     }

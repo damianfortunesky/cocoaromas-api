@@ -8,20 +8,14 @@ import com.cocoaromas.api.domain.catalog.ProductCatalogQuery;
 import com.cocoaromas.api.domain.catalog.ProductCategory;
 import com.cocoaromas.api.domain.catalog.ProductDetail;
 import com.cocoaromas.api.domain.catalog.ProductSummary;
-import com.cocoaromas.api.domain.catalog.ProductVariant;
 import com.cocoaromas.api.domain.catalog.RelatedProduct;
 import com.cocoaromas.api.infrastructure.persistence.entity.catalog.CategoryEntity;
 import com.cocoaromas.api.infrastructure.persistence.entity.catalog.ProductEntity;
 import com.cocoaromas.api.infrastructure.persistence.repository.catalog.CategoryJpaRepository;
 import com.cocoaromas.api.infrastructure.persistence.repository.catalog.ProductJpaRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,25 +26,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class CatalogPersistenceAdapter implements LoadCatalogPort {
 
-    private static final TypeReference<Map<String, String>> MAP_STRING_STRING = new TypeReference<>() {
-    };
-    private static final TypeReference<List<String>> LIST_STRING = new TypeReference<>() {
-    };
-    private static final TypeReference<List<VariantJson>> LIST_VARIANT_JSON = new TypeReference<>() {
-    };
-
     private final ProductJpaRepository productJpaRepository;
     private final CategoryJpaRepository categoryJpaRepository;
-    private final ObjectMapper objectMapper;
 
     public CatalogPersistenceAdapter(
             ProductJpaRepository productJpaRepository,
-            CategoryJpaRepository categoryJpaRepository,
-            ObjectMapper objectMapper
+            CategoryJpaRepository categoryJpaRepository
     ) {
         this.productJpaRepository = productJpaRepository;
         this.categoryJpaRepository = categoryJpaRepository;
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -59,7 +43,7 @@ public class CatalogPersistenceAdapter implements LoadCatalogPort {
 
         Page<ProductEntity> result = productJpaRepository.findAll((root, criteriaQuery, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("visible")));
+            predicates.add(cb.isTrue(root.get("active")));
             predicates.add(cb.isNull(root.get("deletedAt")));
 
             if (query.search() != null && !query.search().isBlank()) {
@@ -92,10 +76,10 @@ public class CatalogPersistenceAdapter implements LoadCatalogPort {
     @Override
     public Optional<ProductDetail> findProductDetailById(Long productId) {
         return productJpaRepository.findById(productId)
-                .filter(product -> Boolean.TRUE.equals(product.getVisible()) && product.getDeletedAt() == null)
+                .filter(product -> Boolean.TRUE.equals(product.getActive()) && product.getDeletedAt() == null)
                 .map(product -> {
                     List<RelatedProduct> relatedProducts = productJpaRepository
-                            .findTop4ByVisibleTrueAndDeletedAtIsNullAndCategoryIdAndIdNotOrderByIdAsc(product.getCategory().getId(), product.getId())
+                            .findTop4ByActiveTrueAndDeletedAtIsNullAndCategoryIdAndIdNotOrderByIdAsc(product.getCategory().getId(), product.getId())
                             .stream()
                             .map(this::toRelatedProduct)
                             .toList();
@@ -118,10 +102,10 @@ public class CatalogPersistenceAdapter implements LoadCatalogPort {
         return new ProductSummary(
                 entity.getId(),
                 entity.getName(),
-                entity.getShortDescription(),
+                entity.getDescription(),
                 entity.getPrice(),
                 toDomain(entity.getCategory()),
-                entity.getMainImageUrl(),
+                entity.getImageUrl(),
                 stock > 0,
                 stock
         );
@@ -132,31 +116,14 @@ public class CatalogPersistenceAdapter implements LoadCatalogPort {
         return new ProductDetail(
                 entity.getId(),
                 entity.getName(),
-                entity.getShortDescription(),
-                entity.getLongDescription(),
+                entity.getDescription(),
                 entity.getPrice(),
                 toDomain(entity.getCategory()),
-                entity.getMainImageUrl(),
-                parseJson(entity.getImageUrlsJson(), LIST_STRING, Collections.emptyList()),
+                entity.getImageUrl(),
                 stock > 0,
                 stock,
-                parseJson(entity.getAttributesJson(), MAP_STRING_STRING, Collections.emptyMap()),
-                parseVariants(entity.getVariantsJson()),
                 relatedProducts
         );
-    }
-
-    private List<ProductVariant> parseVariants(String rawJson) {
-        List<VariantJson> variantsJson = parseJson(rawJson, LIST_VARIANT_JSON, Collections.emptyList());
-        return variantsJson.stream()
-                .map(variantJson -> new ProductVariant(
-                        variantJson.id,
-                        variantJson.name,
-                        variantJson.attributes == null ? Collections.emptyMap() : variantJson.attributes,
-                        variantJson.stockQuantity,
-                        variantJson.available
-                ))
-                .toList();
     }
 
     private RelatedProduct toRelatedProduct(ProductEntity entity) {
@@ -165,32 +132,12 @@ public class CatalogPersistenceAdapter implements LoadCatalogPort {
                 entity.getId(),
                 entity.getName(),
                 entity.getPrice(),
-                entity.getMainImageUrl(),
+                entity.getImageUrl(),
                 stock > 0
         );
     }
 
     private ProductCategory toDomain(CategoryEntity entity) {
         return new ProductCategory(entity.getId(), entity.getSlug(), entity.getName());
-    }
-
-    private <T> T parseJson(String rawJson, TypeReference<T> typeReference, T fallback) {
-        if (rawJson == null || rawJson.isBlank()) {
-            return fallback;
-        }
-
-        try {
-            return objectMapper.readValue(rawJson, typeReference);
-        } catch (Exception ex) {
-            return fallback;
-        }
-    }
-
-    private static class VariantJson {
-        public String id;
-        public String name;
-        public Map<String, String> attributes = new LinkedHashMap<>();
-        public Integer stockQuantity;
-        public Boolean available;
     }
 }
