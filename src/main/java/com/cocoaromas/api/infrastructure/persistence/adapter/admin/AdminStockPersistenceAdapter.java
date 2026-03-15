@@ -6,8 +6,12 @@ import com.cocoaromas.api.domain.admin.stock.AdminStockDetail;
 import com.cocoaromas.api.domain.admin.stock.AdminStockItem;
 import com.cocoaromas.api.domain.admin.stock.AdminStockPage;
 import com.cocoaromas.api.domain.admin.stock.AdminStockQuery;
+import com.cocoaromas.api.infrastructure.persistence.entity.UserEntity;
 import com.cocoaromas.api.infrastructure.persistence.entity.catalog.ProductEntity;
+import com.cocoaromas.api.infrastructure.persistence.entity.stock.InventoryMovementEntity;
+import com.cocoaromas.api.infrastructure.persistence.repository.UserJpaRepository;
 import com.cocoaromas.api.infrastructure.persistence.repository.catalog.ProductJpaRepository;
+import com.cocoaromas.api.infrastructure.persistence.repository.stock.InventoryMovementJpaRepository;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +23,17 @@ import org.springframework.stereotype.Component;
 public class AdminStockPersistenceAdapter implements ManageAdminStocksPort {
 
     private final ProductJpaRepository productJpaRepository;
+    private final InventoryMovementJpaRepository inventoryMovementJpaRepository;
+    private final UserJpaRepository userJpaRepository;
 
-    public AdminStockPersistenceAdapter(ProductJpaRepository productJpaRepository) {
+    public AdminStockPersistenceAdapter(
+            ProductJpaRepository productJpaRepository,
+            InventoryMovementJpaRepository inventoryMovementJpaRepository,
+            UserJpaRepository userJpaRepository
+    ) {
         this.productJpaRepository = productJpaRepository;
+        this.inventoryMovementJpaRepository = inventoryMovementJpaRepository;
+        this.userJpaRepository = userJpaRepository;
     }
 
     @Override
@@ -77,7 +89,14 @@ public class AdminStockPersistenceAdapter implements ManageAdminStocksPort {
     }
 
     @Override
-    public AdminStockDetail updateSimpleStock(Long productId, int newStockQuantity, int lowStockThreshold) {
+    public AdminStockDetail updateSimpleStock(
+            Long productId,
+            int newStockQuantity,
+            int lowStockThreshold,
+            Integer adjustment,
+            String reason,
+            Long actorUserId
+    ) {
         ProductEntity entity = productJpaRepository.findById(productId)
                 .filter(product -> product.getDeletedAt() == null)
                 .orElseThrow(() -> new AdminProductNotFoundException(productId));
@@ -86,7 +105,23 @@ public class AdminStockPersistenceAdapter implements ManageAdminStocksPort {
         entity.setAvailable(newStockQuantity > 0);
         entity.setUpdatedAt(java.time.OffsetDateTime.now());
 
-        return toDetail(productJpaRepository.save(entity), lowStockThreshold);
+        ProductEntity saved = productJpaRepository.save(entity);
+        if (adjustment != null && adjustment != 0) {
+            InventoryMovementEntity movement = new InventoryMovementEntity();
+            movement.setProduct(saved);
+            movement.setMovementType(adjustment > 0 ? "IN" : "OUT");
+            movement.setQuantity(Math.abs(adjustment));
+            movement.setReferenceType("ADMIN_MANUAL");
+            movement.setNotes(reason);
+            movement.setCreatedAt(java.time.OffsetDateTime.now());
+            if (actorUserId != null) {
+                UserEntity actor = userJpaRepository.findById(actorUserId).orElse(null);
+                movement.setCreatedByUser(actor);
+            }
+            inventoryMovementJpaRepository.save(movement);
+        }
+
+        return toDetail(saved, lowStockThreshold);
     }
 
     private AdminStockItem toItem(ProductEntity entity, int lowStockThreshold) {
