@@ -2,6 +2,7 @@ package com.cocoaromas.api.application.service.admin;
 
 import com.cocoaromas.api.application.port.in.admin.AdminStocksUseCase;
 import com.cocoaromas.api.application.port.out.admin.ManageAdminStocksPort;
+import com.cocoaromas.api.application.port.out.auth.SecurityContextPort;
 import com.cocoaromas.api.domain.admin.stock.AdminStockDetail;
 import com.cocoaromas.api.domain.admin.stock.AdminStockPage;
 import com.cocoaromas.api.domain.admin.stock.AdminStockQuery;
@@ -14,12 +15,15 @@ public class AdminStocksService implements AdminStocksUseCase {
 
     private final ManageAdminStocksPort manageAdminStocksPort;
     private final int lowStockThreshold;
+    private final SecurityContextPort securityContextPort;
 
     public AdminStocksService(
             ManageAdminStocksPort manageAdminStocksPort,
+            SecurityContextPort securityContextPort,
             @Value("${app.stock.low-threshold:5}") int lowStockThreshold
     ) {
         this.manageAdminStocksPort = manageAdminStocksPort;
+        this.securityContextPort = securityContextPort;
         this.lowStockThreshold = lowStockThreshold;
     }
 
@@ -46,7 +50,15 @@ public class AdminStocksService implements AdminStocksUseCase {
             throw new AdminStockValidationException("El stock no puede ser negativo");
         }
 
-        return manageAdminStocksPort.updateSimpleStock(productId, targetQuantity, lowStockThreshold);
+        Integer adjustment = targetQuantity - current.stockQuantity();
+        return manageAdminStocksPort.updateSimpleStock(
+                productId,
+                targetQuantity,
+                lowStockThreshold,
+                adjustment,
+                command.reason(),
+                securityContextPort.getAuthenticatedUserId()
+        );
     }
 
     private void validate(UpdateAdminStockCommand command) {

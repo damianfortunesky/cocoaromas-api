@@ -39,4 +39,16 @@ public class CategoryEntity {
     public Integer getDisplayOrder() {
         return displayOrder;
     }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
+    }
 }
