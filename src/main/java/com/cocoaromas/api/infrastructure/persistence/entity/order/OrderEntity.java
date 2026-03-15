@@ -34,7 +34,7 @@ public class OrderEntity {
     private UserEntity user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 40)
+    @Column(name = "status_order", nullable = false, length = 40)
     private OrderStatus status;
 
     @Enumerated(EnumType.STRING)

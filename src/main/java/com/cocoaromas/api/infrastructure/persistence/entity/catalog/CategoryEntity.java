@@ -18,7 +18,7 @@ public class CategoryEntity {
     @Column(nullable = false, unique = true, length = 120)
     private String slug;
 
-    @Column(nullable = false, length = 120)
+    @Column(name = "category_name", nullable = false, unique = true, length = 120)
     private String name;
 
     @Column(name = "display_order", nullable = false)

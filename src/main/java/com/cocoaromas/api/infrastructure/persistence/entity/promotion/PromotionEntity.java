@@ -26,10 +26,10 @@ public class PromotionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 160)
+    @Column(name = "promotion_name", nullable = false, length = 160)
     private String name;
 
-    @Column(length = 1200)
+    @Column(name = "promotion_description", length = 1200)
     private String description;
 
     @Enumerated(EnumType.STRING)
