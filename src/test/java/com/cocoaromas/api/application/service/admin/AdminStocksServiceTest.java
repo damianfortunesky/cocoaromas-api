@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import com.cocoaromas.api.application.port.out.admin.ManageAdminStocksPort;
+import com.cocoaromas.api.application.port.out.auth.SecurityContextPort;
 import com.cocoaromas.api.domain.admin.stock.AdminStockDetail;
 import com.cocoaromas.api.domain.admin.stock.UpdateAdminStockCommand;
 import java.time.OffsetDateTime;
@@ -21,33 +22,37 @@ class AdminStocksServiceTest {
     @Mock
     private ManageAdminStocksPort manageAdminStocksPort;
 
+    @Mock
+    private SecurityContextPort securityContextPort;
+
     private AdminStocksService service;
 
     @BeforeEach
     void setUp() {
-        service = new AdminStocksService(manageAdminStocksPort, 5);
+        service = new AdminStocksService(manageAdminStocksPort, securityContextPort, 5);
+        given(securityContextPort.getAuthenticatedUserId()).willReturn(99L);
     }
 
     @Test
     void shouldSetStockUsingAbsoluteQuantity() {
         given(manageAdminStocksPort.getByProductId(10L, 5)).willReturn(detail(10L, 7));
-        given(manageAdminStocksPort.updateSimpleStock(10L, 12, 5)).willReturn(detail(10L, 12));
+        given(manageAdminStocksPort.updateSimpleStock(10L, 12, 5, 5, "Ajuste inventario", 99L)).willReturn(detail(10L, 12));
 
         AdminStockDetail updated = service.updateStock(10L, new UpdateAdminStockCommand(12, null, "Ajuste inventario"));
 
         assertThat(updated.stockQuantity()).isEqualTo(12);
-        verify(manageAdminStocksPort).updateSimpleStock(10L, 12, 5);
+        verify(manageAdminStocksPort).updateSimpleStock(10L, 12, 5, 5, "Ajuste inventario", 99L);
     }
 
     @Test
     void shouldAdjustStockIncrementally() {
         given(manageAdminStocksPort.getByProductId(10L, 5)).willReturn(detail(10L, 7));
-        given(manageAdminStocksPort.updateSimpleStock(10L, 4, 5)).willReturn(detail(10L, 4));
+        given(manageAdminStocksPort.updateSimpleStock(10L, 4, 5, -3, "Conteo", 99L)).willReturn(detail(10L, 4));
 
         AdminStockDetail updated = service.updateStock(10L, new UpdateAdminStockCommand(null, -3, "Conteo"));
 
         assertThat(updated.stockQuantity()).isEqualTo(4);
-        verify(manageAdminStocksPort).updateSimpleStock(10L, 4, 5);
+        verify(manageAdminStocksPort).updateSimpleStock(10L, 4, 5, -3, "Conteo", 99L);
     }
 
     @Test
