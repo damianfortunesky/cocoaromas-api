@@ -10,8 +10,7 @@ public record AdminStockDetail(
         Integer stockQuantity,
         boolean available,
         boolean lowStock,
-        boolean hasVariants,
-        String mainImageUrl,
+        String imageUrl,
         OffsetDateTime updatedAt
 ) {
 }

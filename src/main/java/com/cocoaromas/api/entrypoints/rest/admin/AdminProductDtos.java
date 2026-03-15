@@ -2,16 +2,13 @@ package com.cocoaromas.api.entrypoints.rest.admin;
 
 import com.cocoaromas.api.domain.admin.AdminProduct;
 import com.cocoaromas.api.domain.admin.AdminProductPage;
-import com.cocoaromas.api.domain.catalog.ProductVariant;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 
 public final class AdminProductDtos {
 
@@ -30,24 +27,25 @@ public final class AdminProductDtos {
     public record AdminProductListItemResponse(
             Long id,
             String name,
+            String description,
             BigDecimal price,
             CategoryResponse category,
-            boolean active,
-            String mainImageUrl,
-            String stockIndicator,
+            Integer stockQuantity,
+            String imageUrl,
+            boolean isActive,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
     ) {
         static AdminProductListItemResponse fromDomain(AdminProduct product) {
-            String stockIndicator = product.stockQuantity() != null && product.stockQuantity() > 0 ? "IN_STOCK" : "OUT_OF_STOCK";
             return new AdminProductListItemResponse(
                     product.id(),
                     product.name(),
+                    product.description(),
                     product.price(),
                     new CategoryResponse(product.categoryId(), product.categoryName()),
-                    product.active(),
-                    product.mainImageUrl(),
-                    stockIndicator,
+                    product.stockQuantity(),
+                    product.imageUrl(),
+                    product.isActive(),
                     product.createdAt(),
                     product.updatedAt()
             );
@@ -58,17 +56,12 @@ public final class AdminProductDtos {
     public record AdminProductDetailResponse(
             Long id,
             String name,
-            String shortDescription,
-            String longDescription,
+            String description,
             BigDecimal price,
             CategoryResponse category,
-            String mainImageUrl,
-            List<String> imageUrls,
-            boolean active,
-            boolean available,
-            Map<String, String> attributes,
-            List<ProductVariantResponse> variants,
             Integer stockQuantity,
+            String imageUrl,
+            boolean isActive,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt
     ) {
@@ -76,17 +69,12 @@ public final class AdminProductDtos {
             return new AdminProductDetailResponse(
                     product.id(),
                     product.name(),
-                    product.shortDescription(),
-                    product.longDescription(),
+                    product.description(),
                     product.price(),
                     new CategoryResponse(product.categoryId(), product.categoryName()),
-                    product.mainImageUrl(),
-                    product.imageUrls(),
-                    product.active(),
-                    product.available(),
-                    product.attributes(),
-                    product.variants().stream().map(ProductVariantResponse::fromDomain).toList(),
                     product.stockQuantity(),
+                    product.imageUrl(),
+                    product.isActive(),
                     product.createdAt(),
                     product.updatedAt()
             );
@@ -97,33 +85,16 @@ public final class AdminProductDtos {
     public record CategoryResponse(Long id, String name) {
     }
 
-    @Schema(name = "AdminProductVariantResponse")
-    public record ProductVariantResponse(String id, String name, Map<String, String> attributes, Integer stockQuantity, Boolean available) {
-        static ProductVariantResponse fromDomain(ProductVariant variant) {
-            return new ProductVariantResponse(variant.id(), variant.name(), variant.attributes(), variant.stockQuantity(), variant.available());
-        }
-    }
-
     @Schema(name = "AdminUpsertProductRequest")
     public record UpsertProductRequest(
             @NotBlank String name,
-            @NotBlank String shortDescription,
-            String longDescription,
+            @NotBlank String description,
             @NotNull @DecimalMin(value = "0.0", inclusive = true) BigDecimal price,
             @NotNull Long categoryId,
-            @NotBlank String mainImageUrl,
-            List<String> imageUrls,
-            Boolean available,
-            Map<String, String> attributes,
-            @Valid List<ProductVariantRequest> variants
+            @NotNull Integer stockQuantity,
+            String imageUrl,
+            Boolean isActive
     ) {
-    }
-
-    @Schema(name = "AdminProductVariantRequest")
-    public record ProductVariantRequest(String id, String name, Map<String, String> attributes, Integer stockQuantity, Boolean available) {
-        ProductVariant toDomain() {
-            return new ProductVariant(id, name, attributes, stockQuantity, available);
-        }
     }
 
     @Schema(name = "AdminUpdateProductStatusRequest")

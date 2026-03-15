@@ -14,11 +14,9 @@ import com.cocoaromas.api.domain.catalog.ProductCatalogPage;
 import com.cocoaromas.api.domain.catalog.ProductCategory;
 import com.cocoaromas.api.domain.catalog.ProductDetail;
 import com.cocoaromas.api.domain.catalog.ProductSummary;
-import com.cocoaromas.api.domain.catalog.ProductVariant;
 import com.cocoaromas.api.domain.catalog.RelatedProduct;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -79,18 +77,11 @@ class CatalogControllerTest {
                 5L,
                 "Remera Oversize Cocoaromas Negra",
                 "Remera unisex de algodón premium.",
-                "Remera oversize con calce relajado.",
                 new BigDecimal("16500.00"),
                 category,
                 "https://images.mock.cocoaromas/remera-oversize-negra.jpg",
-                List.of(
-                        "https://images.mock.cocoaromas/remera-oversize-negra.jpg",
-                        "https://images.mock.cocoaromas/remera-oversize-negra-2.jpg"
-                ),
                 true,
                 6,
-                Map.of("material", "Algodón", "color", "Negro"),
-                List.of(new ProductVariant("REM-OVR-BLK-S", "Talle S", Map.of("talle", "S", "color", "Negro"), 2, true)),
                 List.of(new RelatedProduct(99L, "Remera Blanca", new BigDecimal("15000.00"), "https://images.mock.cocoaromas/remera-blanca.jpg", true))
         );
 
@@ -99,9 +90,7 @@ class CatalogControllerTest {
         mockMvc.perform(get("/api/v1/products/5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.longDescription").value("Remera oversize con calce relajado."))
-                .andExpect(jsonPath("$.attributes.material").value("Algodón"))
-                .andExpect(jsonPath("$.variants[0].id").value("REM-OVR-BLK-S"))
+                .andExpect(jsonPath("$.description").value("Remera unisex de algodón premium."))
                 .andExpect(jsonPath("$.relatedProducts[0].id").value(99));
     }
 

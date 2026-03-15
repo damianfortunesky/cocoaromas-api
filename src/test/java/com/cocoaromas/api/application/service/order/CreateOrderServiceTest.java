@@ -13,7 +13,6 @@ import com.cocoaromas.api.domain.order.CreateOrderItem;
 import com.cocoaromas.api.domain.order.CreatedOrder;
 import com.cocoaromas.api.domain.order.OrderStatus;
 import com.cocoaromas.api.domain.order.PaymentMethod;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -41,13 +40,13 @@ class CreateOrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        createOrderService = new CreateOrderService(loadProductsForOrderPort, saveOrderPort, new ObjectMapper());
+        createOrderService = new CreateOrderService(loadProductsForOrderPort, saveOrderPort);
     }
 
     @Test
     void shouldResolveTransferAsEsperandoPagoAndCalculateTotal() {
         given(loadProductsForOrderPort.findById(1L)).willReturn(java.util.Optional.of(
-                new LoadProductsForOrderPort.ProductForOrder(1L, "Sahumerio", new BigDecimal("3500.00"), 10, false, null, true)
+                new LoadProductsForOrderPort.ProductForOrder(1L, "Sahumerio", new BigDecimal("3500.00"), 10, true)
         ));
         given(saveOrderPort.save(orderCaptor.capture())).willReturn(new CreatedOrder(
                 90L,
@@ -77,21 +76,14 @@ class CreateOrderServiceTest {
     }
 
     @Test
-    void shouldLoadProductOnlyOnceWhenSameProductHasMultipleVariants() {
+    void shouldLoadProductForSingleItem() {
         given(loadProductsForOrderPort.findById(1L)).willReturn(java.util.Optional.of(
-                new LoadProductsForOrderPort.ProductForOrder(
-                        1L,
-                        "Sahumerio",
-                        new BigDecimal("3500.00"),
-                        10,
-                        true,
-                        "[{\"id\":\"v1\",\"available\":true},{\"id\":\"v2\",\"available\":true}]",
-                        true)
+                new LoadProductsForOrderPort.ProductForOrder(1L, "Sahumerio", new BigDecimal("3500.00"), 10, true)
         ));
         given(saveOrderPort.save(orderCaptor.capture())).willReturn(new CreatedOrder(
                 90L,
                 OrderStatus.PENDIENTE,
-                new BigDecimal("7000.00"),
+                new BigDecimal("3500.00"),
                 OffsetDateTime.now(),
                 PaymentMethod.MERCADO_PAGO,
                 List.of()
@@ -99,10 +91,7 @@ class CreateOrderServiceTest {
 
         createOrderService.createOrder(new CreateOrderCommand(
                 5L,
-                List.of(
-                        new CreateOrderItem(1L, 1, "v1"),
-                        new CreateOrderItem(1L, 1, "v2")
-                ),
+                List.of(new CreateOrderItem(1L, 1, null)),
                 PaymentMethod.MERCADO_PAGO,
                 null,
                 null

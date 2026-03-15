@@ -8,7 +8,6 @@ public record AdminStockItem(
         Integer stockQuantity,
         boolean available,
         boolean lowStock,
-        boolean hasVariants,
-        String mainImageUrl
+        String imageUrl
 ) {
 }

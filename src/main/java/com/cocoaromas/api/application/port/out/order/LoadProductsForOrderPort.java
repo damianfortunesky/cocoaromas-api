@@ -11,9 +11,7 @@ public interface LoadProductsForOrderPort {
             String name,
             BigDecimal price,
             Integer stockQuantity,
-            boolean hasVariants,
-            String variantsJson,
-            boolean visible
+            boolean active
     ) {
     }
 }

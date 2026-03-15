@@ -130,6 +130,6 @@ class OrderControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderId").value(15))
                 .andExpect(jsonPath("$.items[0].productId").value(1))
-                .andExpect(jsonPath("$.items[0].mainImageUrl").value("https://cdn.example.com/sahumerio.jpg"));
+                .andExpect(jsonPath("$.items[0].imageUrl").value("https://cdn.example.com/sahumerio.jpg"));
     }
 }

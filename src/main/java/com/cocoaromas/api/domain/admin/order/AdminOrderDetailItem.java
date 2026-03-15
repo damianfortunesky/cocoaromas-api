@@ -8,6 +8,6 @@ public record AdminOrderDetailItem(
         BigDecimal unitPrice,
         Integer quantity,
         BigDecimal subtotal,
-        String mainImageUrl
+        String imageUrl
 ) {
 }
