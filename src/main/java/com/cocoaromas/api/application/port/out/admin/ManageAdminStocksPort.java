@@ -9,5 +9,5 @@ public interface ManageAdminStocksPort {
 
     AdminStockDetail getByProductId(Long productId, int lowStockThreshold);
 
-    AdminStockDetail updateSimpleStock(Long productId, int newStockQuantity, int lowStockThreshold);
+    AdminStockDetail updateSimpleStock(Long productId, int newStockQuantity, int lowStockThreshold, Integer adjustment, String reason, Long actorUserId);
 }
