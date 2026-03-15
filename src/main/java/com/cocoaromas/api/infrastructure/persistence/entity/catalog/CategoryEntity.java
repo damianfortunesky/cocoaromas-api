@@ -28,27 +28,33 @@ public class CategoryEntity {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getSlug() {
         return slug;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Integer getDisplayOrder() {
-        return displayOrder;
     }
 
     public void setSlug(String slug) {
         this.slug = slug;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getDisplayOrder() {
+        return displayOrder;
     }
 
     public void setDisplayOrder(Integer displayOrder) {
         this.displayOrder = displayOrder;
     }
+
+ 
 }
