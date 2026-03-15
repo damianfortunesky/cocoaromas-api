@@ -146,7 +146,7 @@ public final class OrderDtos {
             BigDecimal unitPrice,
             Integer quantity,
             BigDecimal subtotal,
-            String mainImageUrl
+            String imageUrl
     ) {
         static MyOrderItemDetailResponse fromDomain(CustomerOrderItemDetail item) {
             return new MyOrderItemDetailResponse(
@@ -155,7 +155,7 @@ public final class OrderDtos {
                     item.unitPrice(),
                     item.quantity(),
                     item.subtotal(),
-                    item.mainImageUrl()
+                    item.imageUrl()
             );
         }
     }

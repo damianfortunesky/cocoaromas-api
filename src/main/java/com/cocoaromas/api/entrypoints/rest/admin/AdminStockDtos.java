@@ -40,8 +40,7 @@ public final class AdminStockDtos {
             Integer stockQuantity,
             boolean available,
             boolean lowStock,
-            boolean hasVariants,
-            String mainImageUrl
+            String imageUrl
     ) {
         static StockItemResponse fromDomain(AdminStockItem item) {
             return new StockItemResponse(
@@ -52,8 +51,7 @@ public final class AdminStockDtos {
                     item.stockQuantity(),
                     item.available(),
                     item.lowStock(),
-                    item.hasVariants(),
-                    item.mainImageUrl()
+                    item.imageUrl()
             );
         }
     }
@@ -67,8 +65,7 @@ public final class AdminStockDtos {
             Integer stockQuantity,
             boolean available,
             boolean lowStock,
-            boolean hasVariants,
-            String mainImageUrl,
+            String imageUrl,
             OffsetDateTime updatedAt
     ) {
         static StockDetailResponse fromDomain(AdminStockDetail detail) {
@@ -80,8 +77,7 @@ public final class AdminStockDtos {
                     detail.stockQuantity(),
                     detail.available(),
                     detail.lowStock(),
-                    detail.hasVariants(),
-                    detail.mainImageUrl(),
+                    detail.imageUrl(),
                     detail.updatedAt()
             );
         }

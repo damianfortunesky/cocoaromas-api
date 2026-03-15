@@ -6,7 +6,7 @@ public record RelatedProduct(
         Long id,
         String name,
         BigDecimal price,
-        String mainImageUrl,
+        String imageUrl,
         boolean available
 ) {
 }
