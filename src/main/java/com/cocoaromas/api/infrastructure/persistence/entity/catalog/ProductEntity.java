@@ -12,10 +12,10 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 160)
+    @Column(name = "product_name", nullable = false, length = 160)
     private String name;
 
-    @Column(name = "description", nullable = false, length = 2000)
+    @Column(name = "product_description", nullable = false, length = 2000)
     private String description;
 
     @Column(nullable = false, precision = 12, scale = 2)

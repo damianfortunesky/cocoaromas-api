@@ -26,7 +26,7 @@ public class UserEntity {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column(name = "role_name", nullable = false, length = 30)
     private Role role;
 
     @Column(name = "is_active", nullable = false)

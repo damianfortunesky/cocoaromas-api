@@ -40,7 +40,7 @@ public class UserAddressEntity {
     @Column(nullable = false, length = 120)
     private String city;
 
-    @Column(length = 120)
+    @Column(name = "state_name", length = 120)
     private String state;
 
     @Column(name = "postal_code", nullable = false, length = 20)
