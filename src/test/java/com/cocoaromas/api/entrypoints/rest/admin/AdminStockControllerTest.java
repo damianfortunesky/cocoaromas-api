@@ -44,10 +44,12 @@ class AdminStockControllerTest {
 
         mockMvc.perform(get("/api/v1/admin/stocks")
                         .param("search", "sahu")
-                        .param("lowStock", "true"))
+                        .param("lowStock", "true")
+                        .param("available", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].productId").value(3))
-                .andExpect(jsonPath("$.items[0].lowStock").value(true));
+                .andExpect(jsonPath("$.items[0].lowStock").value(true))
+                .andExpect(jsonPath("$.items[0].imageUrl").value("https://img"));
     }
 
     @Test
@@ -59,6 +61,7 @@ class AdminStockControllerTest {
                 true,
                 0,
                 false,
+                true,
                 "https://img",
                 OffsetDateTime.parse("2026-01-01T10:00:00Z")
         ));

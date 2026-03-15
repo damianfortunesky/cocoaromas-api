@@ -4,8 +4,22 @@ BEGIN
 END
 GO
 
+IF COL_LENGTH('dbo.products', 'short_description') IS NOT NULL
+BEGIN
+    UPDATE dbo.products
+    SET description = ISNULL(description, short_description)
+    WHERE description IS NULL;
+END
+ELSE
+BEGIN
+    UPDATE dbo.products
+    SET description = ''
+    WHERE description IS NULL;
+END
+GO
+
 UPDATE dbo.products
-SET description = ISNULL(description, short_description)
+SET description = ''
 WHERE description IS NULL;
 GO
 
@@ -18,12 +32,36 @@ BEGIN
 END
 GO
 
-UPDATE dbo.products
-SET image_url = main_image_url
-WHERE image_url IS NULL;
+IF COL_LENGTH('dbo.products', 'main_image_url') IS NOT NULL
+BEGIN
+    UPDATE dbo.products
+    SET image_url = main_image_url
+    WHERE image_url IS NULL;
+END
 GO
 
-ALTER TABLE dbo.products DROP COLUMN short_description;
+DECLARE @dropConstraintSql NVARCHAR(MAX) = N'';
+
+SELECT @dropConstraintSql = @dropConstraintSql +
+       N'ALTER TABLE dbo.products DROP CONSTRAINT [' + REPLACE(dc.name, ']', ']]') + N'];' + CHAR(10)
+FROM sys.default_constraints dc
+INNER JOIN sys.columns c
+        ON c.object_id = dc.parent_object_id
+       AND c.column_id = dc.parent_column_id
+WHERE dc.parent_object_id = OBJECT_ID(N'dbo.products')
+  AND c.name IN (N'short_description', N'long_description', N'main_image_url', N'image_urls_json',
+                 N'attributes_json', N'variants_json', N'has_variants', N'is_visible', N'is_available');
+
+IF LEN(@dropConstraintSql) > 0
+BEGIN
+    EXEC(@dropConstraintSql);
+END
+GO
+
+IF COL_LENGTH('dbo.products', 'short_description') IS NOT NULL
+BEGIN
+    ALTER TABLE dbo.products DROP COLUMN short_description;
+END
 GO
 
 IF COL_LENGTH('dbo.products', 'long_description') IS NOT NULL
@@ -32,7 +70,10 @@ BEGIN
 END
 GO
 
-ALTER TABLE dbo.products DROP COLUMN main_image_url;
+IF COL_LENGTH('dbo.products', 'main_image_url') IS NOT NULL
+BEGIN
+    ALTER TABLE dbo.products DROP COLUMN main_image_url;
+END
 GO
 
 IF COL_LENGTH('dbo.products', 'image_urls_json') IS NOT NULL
