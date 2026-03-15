@@ -162,7 +162,7 @@ CREATE INDEX idx_products_active ON products(is_active);
 CREATE INDEX idx_products_deleted_at ON products(deleted_at);
 
 CREATE INDEX idx_orders_user ON orders(user_id);
-CREATE INDEX idx_orders_status ON orders(status_order);
+CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_created_at ON orders(created_at);
 CREATE INDEX idx_orders_payment_method ON orders(payment_method);
 CREATE INDEX idx_orders_payment_status ON orders(payment_status);

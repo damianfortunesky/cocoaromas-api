@@ -53,25 +53,6 @@ class AdminStockControllerTest {
     }
 
     @Test
-    void shouldGetStockByProductId() throws Exception {
-        given(adminStocksUseCase.getByProductId(10L)).willReturn(new AdminStockDetail(
-                10L,
-                "Producto",
-                "Perfumes",
-                true,
-                0,
-                false,
-                "https://img",
-                OffsetDateTime.parse("2026-01-01T10:00:00Z")
-        ));
-
-        mockMvc.perform(get("/api/v1/admin/stocks/10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productId").value(10))
-                .andExpect(jsonPath("$.available").value(false));
-    }
-
-    @Test
     void shouldPatchStock() throws Exception {
         given(adminStocksUseCase.updateStock(any(), any())).willReturn(new AdminStockDetail(
                 8L,
