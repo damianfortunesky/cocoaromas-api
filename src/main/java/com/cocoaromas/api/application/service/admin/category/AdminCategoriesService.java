@@ -34,7 +34,7 @@ public class AdminCategoriesService implements AdminCategoriesUseCase {
 
     @Override
     public AdminCategory update(Long id, UpsertAdminCategoryCommand command) {
-        validate(command);
+        validateForUpdate(id, command);
         CategoryEntity entity = categoryJpaRepository.findById(id).orElseThrow(() -> new AdminCategoryNotFoundException(id));
         entity.setSlug(command.slug().trim().toLowerCase());
         entity.setName(command.name().trim());
@@ -51,6 +51,34 @@ public class AdminCategoriesService implements AdminCategoriesUseCase {
     private void validate(UpsertAdminCategoryCommand command) {
         if (command.slug() == null || command.slug().isBlank()) throw new AdminCategoryValidationException("slug es requerido");
         if (command.name() == null || command.name().isBlank()) throw new AdminCategoryValidationException("name es requerido");
+
+        String normalizedSlug = command.slug().trim().toLowerCase();
+        String normalizedName = command.name().trim().toLowerCase();
+
+        if (categoryJpaRepository.existsBySlugIgnoreCase(normalizedSlug)) {
+            throw new AdminCategoryValidationException("slug ya existe");
+        }
+
+        if (categoryJpaRepository.existsByNameIgnoreCase(normalizedName)) {
+            throw new AdminCategoryValidationException("name ya existe");
+        }
+    }
+
+
+    private void validateForUpdate(Long id, UpsertAdminCategoryCommand command) {
+        if (command.slug() == null || command.slug().isBlank()) throw new AdminCategoryValidationException("slug es requerido");
+        if (command.name() == null || command.name().isBlank()) throw new AdminCategoryValidationException("name es requerido");
+
+        String normalizedSlug = command.slug().trim().toLowerCase();
+        String normalizedName = command.name().trim().toLowerCase();
+
+        if (categoryJpaRepository.existsBySlugIgnoreCaseAndIdNot(normalizedSlug, id)) {
+            throw new AdminCategoryValidationException("slug ya existe");
+        }
+
+        if (categoryJpaRepository.existsByNameIgnoreCaseAndIdNot(normalizedName, id)) {
+            throw new AdminCategoryValidationException("name ya existe");
+        }
     }
 
     private AdminCategory toDomain(CategoryEntity entity) {
