@@ -123,7 +123,7 @@ public class AdminOrderPersistenceAdapter implements ManageAdminOrdersPort {
                         item.getUnitPrice(),
                         item.getQuantity(),
                         item.getSubtotal(),
-                        item.getProduct().getMainImageUrl()
+                        item.getProduct().getImageUrl()
                 )).toList()
         );
     }

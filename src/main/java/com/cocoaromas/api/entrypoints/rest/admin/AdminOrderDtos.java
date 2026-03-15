@@ -108,7 +108,7 @@ public final class AdminOrderDtos {
             BigDecimal unitPrice,
             Integer quantity,
             BigDecimal subtotal,
-            String mainImageUrl
+            String imageUrl
     ) {
         static AdminOrderItemDetailResponse fromDomain(AdminOrderDetailItem item) {
             return new AdminOrderItemDetailResponse(
@@ -117,7 +117,7 @@ public final class AdminOrderDtos {
                     item.unitPrice(),
                     item.quantity(),
                     item.subtotal(),
-                    item.mainImageUrl()
+                    item.imageUrl()
             );
         }
     }

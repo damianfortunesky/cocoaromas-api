@@ -80,7 +80,6 @@ class AdminStocksServiceTest {
                 quantity,
                 quantity > 0,
                 quantity > 0 && quantity <= 5,
-                false,
                 "https://image",
                 OffsetDateTime.parse("2026-01-01T10:00:00Z")
         );

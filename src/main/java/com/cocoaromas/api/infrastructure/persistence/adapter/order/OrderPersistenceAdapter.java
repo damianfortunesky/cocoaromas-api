@@ -51,9 +51,7 @@ public class OrderPersistenceAdapter implements LoadProductsForOrderPort, SaveOr
                         product.getName(),
                         product.getPrice(),
                         product.getStockQuantity(),
-                        Boolean.TRUE.equals(product.getHasVariants()),
-                        product.getVariantsJson(),
-                        Boolean.TRUE.equals(product.getVisible())
+                        Boolean.TRUE.equals(product.getActive())
                 ));
     }
 
@@ -157,7 +155,7 @@ public class OrderPersistenceAdapter implements LoadProductsForOrderPort, SaveOr
                                     item.getUnitPrice(),
                                     item.getQuantity(),
                                     item.getSubtotal(),
-                                    item.getProduct().getMainImageUrl()
+                                    item.getProduct().getImageUrl()
                             )).toList()
                     );
                 });

@@ -85,15 +85,12 @@ public class AdminProductController {
     private UpsertAdminProductCommand toCommand(UpsertProductRequest request) {
         return new UpsertAdminProductCommand(
                 request.name(),
-                request.shortDescription(),
-                request.longDescription(),
+                request.description(),
                 request.price(),
                 request.categoryId(),
-                request.mainImageUrl(),
-                request.imageUrls(),
-                request.available(),
-                request.attributes(),
-                request.variants() == null ? null : request.variants().stream().map(AdminProductDtos.ProductVariantRequest::toDomain).toList()
+                request.stockQuantity(),
+                request.imageUrl(),
+                request.isActive()
         );
     }
 }

@@ -29,18 +29,13 @@ public class AdminProductsService implements AdminProductsUseCase {
         AdminProduct product = new AdminProduct(
                 null,
                 command.name(),
-                command.shortDescription(),
-                command.longDescription(),
+                command.description(),
                 command.price(),
                 command.categoryId(),
                 null,
-                command.mainImageUrl(),
-                command.imageUrls(),
-                true,
-                Boolean.TRUE.equals(command.available()),
-                command.attributes(),
-                command.variants(),
-                0,
+                command.stockQuantity(),
+                command.imageUrl(),
+                command.isActive() == null || command.isActive(),
                 null,
                 null
         );
@@ -54,18 +49,13 @@ public class AdminProductsService implements AdminProductsUseCase {
         AdminProduct product = new AdminProduct(
                 current.id(),
                 command.name(),
-                command.shortDescription(),
-                command.longDescription(),
+                command.description(),
                 command.price(),
                 command.categoryId(),
                 null,
-                command.mainImageUrl(),
-                command.imageUrls(),
-                current.active(),
-                Boolean.TRUE.equals(command.available()),
-                command.attributes(),
-                command.variants(),
-                current.stockQuantity(),
+                command.stockQuantity(),
+                command.imageUrl(),
+                command.isActive() == null ? current.isActive() : command.isActive(),
                 current.createdAt(),
                 null
         );
@@ -83,18 +73,13 @@ public class AdminProductsService implements AdminProductsUseCase {
         return manageAdminProductsPort.save(new AdminProduct(
                 current.id(),
                 current.name(),
-                current.shortDescription(),
-                current.longDescription(),
+                current.description(),
                 current.price(),
                 current.categoryId(),
                 current.categoryName(),
-                current.mainImageUrl(),
-                current.imageUrls(),
-                active,
-                current.available(),
-                current.attributes(),
-                current.variants(),
                 current.stockQuantity(),
+                current.imageUrl(),
+                active,
                 current.createdAt(),
                 null
         ));
@@ -104,14 +89,17 @@ public class AdminProductsService implements AdminProductsUseCase {
         if (command.name() == null || command.name().isBlank()) {
             throw new AdminProductValidationException("El nombre es obligatorio");
         }
+        if (command.description() == null || command.description().isBlank()) {
+            throw new AdminProductValidationException("La descripción es obligatoria");
+        }
         if (command.price() == null || command.price().compareTo(BigDecimal.ZERO) < 0) {
             throw new AdminProductValidationException("El precio debe ser válido y no negativo");
         }
+        if (command.stockQuantity() == null || command.stockQuantity() < 0) {
+            throw new AdminProductValidationException("El stock debe ser válido y no negativo");
+        }
         if (command.categoryId() == null || !manageAdminProductsPort.existsCategory(command.categoryId())) {
             throw new AdminProductValidationException("La categoría es inválida");
-        }
-        if (command.attributes() != null && command.attributes().keySet().stream().anyMatch(k -> k == null || k.isBlank())) {
-            throw new AdminProductValidationException("Los atributos deben tener claves válidas");
         }
     }
 }

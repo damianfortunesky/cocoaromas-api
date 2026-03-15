@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface ProductJpaRepository extends JpaRepository<ProductEntity, Long>, JpaSpecificationExecutor<ProductEntity> {
 
-    List<ProductEntity> findTop4ByVisibleTrueAndDeletedAtIsNullAndCategoryIdAndIdNotOrderByIdAsc(Long categoryId, Long productId);
+    List<ProductEntity> findTop4ByActiveTrueAndDeletedAtIsNullAndCategoryIdAndIdNotOrderByIdAsc(Long categoryId, Long productId);
 }

@@ -5,10 +5,10 @@ import java.math.BigDecimal;
 public record ProductSummary(
         Long id,
         String name,
-        String shortDescription,
+        String description,
         BigDecimal price,
         ProductCategory category,
-        String mainImageUrl,
+        String imageUrl,
         boolean available,
         int stockQuantity
 ) {
