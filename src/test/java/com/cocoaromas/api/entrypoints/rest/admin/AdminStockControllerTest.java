@@ -35,7 +35,7 @@ class AdminStockControllerTest {
     @Test
     void shouldListAdminStocks() throws Exception {
         given(adminStocksUseCase.list(any())).willReturn(new AdminStockPage(
-                List.of(new AdminStockItem(3L, "Sahumerio", "Sahumerios", true, 4, true, true, false, "https://img")),
+                List.of(new AdminStockItem(3L, "Sahumerio", "Sahumerios", true, 4, true, true, "https://img")),
                 0,
                 20,
                 1,
@@ -60,7 +60,6 @@ class AdminStockControllerTest {
                 0,
                 false,
                 false,
-                true,
                 "https://img",
                 OffsetDateTime.parse("2026-01-01T10:00:00Z")
         ));
@@ -68,8 +67,7 @@ class AdminStockControllerTest {
         mockMvc.perform(get("/api/v1/admin/stocks/10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.productId").value(10))
-                .andExpect(jsonPath("$.available").value(false))
-                .andExpect(jsonPath("$.hasVariants").value(true));
+                .andExpect(jsonPath("$.available").value(false));
     }
 
     @Test
@@ -81,7 +79,6 @@ class AdminStockControllerTest {
                 true,
                 11,
                 true,
-                false,
                 false,
                 "https://img",
                 OffsetDateTime.parse("2026-01-01T10:00:00Z")

@@ -5,20 +5,14 @@ import com.cocoaromas.api.application.service.admin.AdminProductNotFoundExceptio
 import com.cocoaromas.api.domain.admin.AdminProduct;
 import com.cocoaromas.api.domain.admin.AdminProductPage;
 import com.cocoaromas.api.domain.admin.AdminProductQuery;
-import com.cocoaromas.api.domain.catalog.ProductCategory;
-import com.cocoaromas.api.domain.catalog.ProductVariant;
 import com.cocoaromas.api.infrastructure.persistence.entity.catalog.CategoryEntity;
 import com.cocoaromas.api.infrastructure.persistence.entity.catalog.ProductEntity;
 import com.cocoaromas.api.infrastructure.persistence.repository.catalog.CategoryJpaRepository;
 import com.cocoaromas.api.infrastructure.persistence.repository.catalog.ProductJpaRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.criteria.Predicate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -26,22 +20,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminProductPersistenceAdapter implements ManageAdminProductsPort {
 
-    private static final TypeReference<List<String>> LIST_STRING = new TypeReference<>() {};
-    private static final TypeReference<Map<String, String>> MAP_STRING_STRING = new TypeReference<>() {};
-    private static final TypeReference<List<VariantJson>> LIST_VARIANT_JSON = new TypeReference<>() {};
-
     private final ProductJpaRepository productJpaRepository;
     private final CategoryJpaRepository categoryJpaRepository;
-    private final ObjectMapper objectMapper;
 
     public AdminProductPersistenceAdapter(
             ProductJpaRepository productJpaRepository,
-            CategoryJpaRepository categoryJpaRepository,
-            ObjectMapper objectMapper
+            CategoryJpaRepository categoryJpaRepository
     ) {
         this.productJpaRepository = productJpaRepository;
         this.categoryJpaRepository = categoryJpaRepository;
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -81,21 +68,12 @@ public class AdminProductPersistenceAdapter implements ManageAdminProductsPort {
                 .orElseThrow(() -> new AdminProductNotFoundException(product.categoryId()));
 
         entity.setName(product.name());
-        entity.setShortDescription(product.shortDescription());
-        entity.setLongDescription(product.longDescription());
+        entity.setDescription(product.description());
         entity.setPrice(product.price());
         entity.setCategory(category);
-        entity.setMainImageUrl(product.mainImageUrl());
-        entity.setImageUrlsJson(writeJson(product.imageUrls()));
-        entity.setAttributesJson(writeJson(product.attributes()));
-        entity.setVariantsJson(writeJson(product.variants()));
-        entity.setActive(product.active());
-        entity.setVisible(product.active());
-        entity.setAvailable(product.available());
-        entity.setHasVariants(product.variants() != null && !product.variants().isEmpty());
-        if (entity.getStockQuantity() == null) {
-            entity.setStockQuantity(product.stockQuantity() == null ? 0 : product.stockQuantity());
-        }
+        entity.setImageUrl(product.imageUrl());
+        entity.setStockQuantity(product.stockQuantity());
+        entity.setActive(product.isActive());
         if (entity.getCreatedAt() == null) {
             entity.setCreatedAt(OffsetDateTime.now());
         }
@@ -117,7 +95,6 @@ public class AdminProductPersistenceAdapter implements ManageAdminProductsPort {
         ProductEntity entity = productJpaRepository.findById(id).orElseThrow(() -> new AdminProductNotFoundException(id));
         entity.setDeletedAt(OffsetDateTime.now());
         entity.setActive(false);
-        entity.setVisible(false);
         entity.setUpdatedAt(OffsetDateTime.now());
         productJpaRepository.save(entity);
     }
@@ -129,75 +106,24 @@ public class AdminProductPersistenceAdapter implements ManageAdminProductsPort {
 
     private String mapSort(String sortBy) {
         return switch (sortBy) {
-            case "name", "price", "createdAt", "updatedAt" -> switch (sortBy) {
-                case "createdAt" -> "createdAt";
-                case "updatedAt" -> "updatedAt";
-                default -> sortBy;
-            };
+            case "name", "price", "createdAt", "updatedAt" -> sortBy;
             default -> "updatedAt";
         };
     }
 
     private AdminProduct toDomain(ProductEntity entity) {
-        ProductCategory category = new ProductCategory(entity.getCategory().getId(), entity.getCategory().getSlug(), entity.getCategory().getName());
         return new AdminProduct(
                 entity.getId(),
                 entity.getName(),
-                entity.getShortDescription(),
-                entity.getLongDescription(),
+                entity.getDescription(),
                 entity.getPrice(),
-                category.id(),
-                category.name(),
-                entity.getMainImageUrl(),
-                parseJson(entity.getImageUrlsJson(), LIST_STRING, Collections.emptyList()),
-                Boolean.TRUE.equals(entity.getActive()),
-                Boolean.TRUE.equals(entity.getAvailable()),
-                parseJson(entity.getAttributesJson(), MAP_STRING_STRING, Collections.emptyMap()),
-                parseVariants(entity.getVariantsJson()),
+                entity.getCategory().getId(),
+                entity.getCategory().getName(),
                 entity.getStockQuantity(),
+                entity.getImageUrl(),
+                Boolean.TRUE.equals(entity.getActive()),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
-    }
-
-    private List<ProductVariant> parseVariants(String rawJson) {
-        List<VariantJson> variantsJson = parseJson(rawJson, LIST_VARIANT_JSON, Collections.emptyList());
-        return variantsJson.stream()
-                .map(variantJson -> new ProductVariant(
-                        variantJson.id,
-                        variantJson.name,
-                        variantJson.attributes == null ? Collections.emptyMap() : variantJson.attributes,
-                        variantJson.stockQuantity,
-                        variantJson.available
-                ))
-                .toList();
-    }
-
-    private String writeJson(Object raw) {
-        try {
-            return raw == null ? null : objectMapper.writeValueAsString(raw);
-        } catch (Exception ex) {
-            throw new IllegalArgumentException("Formato JSON inválido");
-        }
-    }
-
-    private <T> T parseJson(String rawJson, TypeReference<T> typeReference, T fallback) {
-        if (rawJson == null || rawJson.isBlank()) {
-            return fallback;
-        }
-
-        try {
-            return objectMapper.readValue(rawJson, typeReference);
-        } catch (Exception ex) {
-            return fallback;
-        }
-    }
-
-    private static class VariantJson {
-        public String id;
-        public String name;
-        public Map<String, String> attributes;
-        public Integer stockQuantity;
-        public Boolean available;
     }
 }
