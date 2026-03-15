@@ -15,10 +15,10 @@ public class OpenApiConfig {
     public OpenAPI cocoaromasOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Cocoaromas API")
+                        .title("coco-aromas API")
                         .description("Base backend ecommerce alineada con frontend existente")
                         .version("v1")
-                        .contact(new Contact().name("Cocoaromas Team")))
+                        .contact(new Contact().name("coco-aromas team")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .schemaRequirement("bearerAuth", new SecurityScheme()
                         .name("Authorization")
