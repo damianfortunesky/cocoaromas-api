@@ -34,8 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             try {
                 Claims claims = jwtTokenProvider.parseClaims(token);
-                Long userId = Long.valueOf(claims.getSubject());
-                Role role = Role.valueOf(claims.get("role", String.class));
+                Long userId = parseUserId(claims.getSubject());
+                Role role = parseRole(claims.get("role", String.class));
                 UserPrincipal principal = new UserPrincipal(userId, claims.get("email", String.class), role);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         principal,
@@ -49,5 +49,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private Long parseUserId(String subject) {
+        if (subject == null || subject.isBlank()) {
+            throw new IllegalArgumentException("Missing subject in JWT");
+        }
+        return Long.valueOf(subject.trim());
+    }
+
+    private Role parseRole(String rawRole) {
+        if (rawRole == null || rawRole.isBlank()) {
+            throw new IllegalArgumentException("Missing role in JWT");
+        }
+
+        String normalized = rawRole.trim().toUpperCase();
+        if (normalized.startsWith("ROLE_")) {
+            normalized = normalized.substring("ROLE_".length());
+        }
+
+        return Role.valueOf(normalized);
     }
 }
