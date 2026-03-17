@@ -8,8 +8,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -92,10 +94,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
+        if (authorities instanceof String rawAuthorities && !rawAuthorities.isBlank()) {
+            return Arrays.stream(rawAuthorities.split(","))
+                    .map(String::trim)
+                    .map(this::parseRoleValue)
+                    .filter(role -> role != null)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Missing role/authorities in JWT"));
+        }
+
         throw new IllegalArgumentException("Missing role/authorities in JWT");
     }
 
     private Role parseRoleValue(Object rawRole) {
+        if (rawRole instanceof Map<?, ?> roleMap) {
+            Object authority = roleMap.get("authority");
+            if (authority != null) {
+                return parseRoleValue(authority);
+            }
+        }
+
         if (!(rawRole instanceof String roleValue) || roleValue.isBlank()) {
             return null;
         }
