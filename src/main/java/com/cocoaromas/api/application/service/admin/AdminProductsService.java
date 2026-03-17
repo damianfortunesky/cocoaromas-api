@@ -20,7 +20,22 @@ public class AdminProductsService implements AdminProductsUseCase {
 
     @Override
     public AdminProductPage list(AdminProductQuery query) {
-        return manageAdminProductsPort.find(query);
+        AdminProductQuery normalizedQuery = normalizeQuery(query);
+        AdminProductPage page = manageAdminProductsPort.find(normalizedQuery);
+
+        if (normalizedQuery.page() > 0 && page.totalElements() > 0 && page.items().isEmpty()) {
+            return manageAdminProductsPort.find(new AdminProductQuery(
+                    normalizedQuery.search(),
+                    normalizedQuery.categoryId(),
+                    normalizedQuery.active(),
+                    0,
+                    normalizedQuery.size(),
+                    normalizedQuery.sortBy(),
+                    normalizedQuery.direction()
+            ));
+        }
+
+        return page;
     }
 
     @Override
@@ -83,6 +98,21 @@ public class AdminProductsService implements AdminProductsUseCase {
                 current.createdAt(),
                 null
         ));
+    }
+
+
+    private AdminProductQuery normalizeQuery(AdminProductQuery query) {
+        int normalizedPage = Math.max(query.page(), 0);
+        int normalizedSize = Math.min(Math.max(query.size(), 1), 100);
+        return new AdminProductQuery(
+                query.search(),
+                query.categoryId(),
+                query.active(),
+                normalizedPage,
+                normalizedSize,
+                query.sortBy(),
+                query.direction()
+        );
     }
 
     private void validate(UpsertAdminProductCommand command) {
