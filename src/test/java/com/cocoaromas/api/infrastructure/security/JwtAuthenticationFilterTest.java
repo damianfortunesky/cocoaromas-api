@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
 import jakarta.servlet.FilterChain;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -26,16 +27,12 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void shouldAuthenticateTokenWithPrefixedRole() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer token-value");
-
         Claims claims = new DefaultClaims();
         claims.setSubject("1");
         claims.put("role", "ROLE_ADMIN");
         claims.put("email", "admin@cocoaromas.local");
-        given(jwtTokenProvider.parseClaims("token-value")).willReturn(claims);
 
-        filter.doFilter(request, new MockHttpServletResponse(), mock(FilterChain.class));
+        authenticateWithClaims(claims);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
         assertThat(SecurityContextHolder.getContext().getAuthentication().getAuthorities())
@@ -45,20 +42,51 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void shouldAuthenticateTokenWithLowercaseRole() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer token-value");
-
         Claims claims = new DefaultClaims();
         claims.setSubject("1");
         claims.put("role", "admin");
         claims.put("email", "admin@cocoaromas.local");
-        given(jwtTokenProvider.parseClaims("token-value")).willReturn(claims);
 
-        filter.doFilter(request, new MockHttpServletResponse(), mock(FilterChain.class));
+        authenticateWithClaims(claims);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
         assertThat(SecurityContextHolder.getContext().getAuthentication().getAuthorities())
                 .extracting("authority")
                 .containsExactly("ROLE_ADMIN");
+    }
+
+    @Test
+    void shouldAuthenticateTokenUsingAuthoritiesClaimWhenRoleClaimIsMissing() throws Exception {
+        Claims claims = new DefaultClaims();
+        claims.setSubject("1");
+        claims.put("authorities", List.of("ROLE_ADMIN"));
+        claims.put("email", "admin@cocoaromas.local");
+
+        authenticateWithClaims(claims);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getAuthorities())
+                .extracting("authority")
+                .containsExactly("ROLE_ADMIN");
+    }
+
+    @Test
+    void shouldAuthenticateTokenUsingUserIdClaimWhenSubjectIsMissing() throws Exception {
+        Claims claims = new DefaultClaims();
+        claims.put("userId", 1);
+        claims.put("role", "ADMIN");
+        claims.put("email", "admin@cocoaromas.local");
+
+        authenticateWithClaims(claims);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+    }
+
+    private void authenticateWithClaims(Claims claims) throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer token-value");
+        given(jwtTokenProvider.parseClaims("token-value")).willReturn(claims);
+
+        filter.doFilter(request, new MockHttpServletResponse(), mock(FilterChain.class));
     }
 }

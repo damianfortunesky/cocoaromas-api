@@ -8,7 +8,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -31,43 +36,79 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+            String token = authHeader.substring(7).trim();
             try {
                 Claims claims = jwtTokenProvider.parseClaims(token);
-                Long userId = parseUserId(claims.getSubject());
-                Role role = parseRole(claims.get("role", String.class));
-                UserPrincipal principal = new UserPrincipal(userId, claims.get("email", String.class), role);
+                Long userId = parseUserId(claims);
+                Role role = parseRole(claims);
+                String email = claims.get("email", String.class);
+
+                UserPrincipal principal = new UserPrincipal(userId, email, role);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         principal,
                         null,
                         List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
                 );
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (JwtException | IllegalArgumentException ignored) {
+            } catch (JwtException | IllegalArgumentException ex) {
                 SecurityContextHolder.clearContext();
+                log.debug("JWT authentication skipped: {}", ex.getMessage());
             }
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private Long parseUserId(String subject) {
-        if (subject == null || subject.isBlank()) {
-            throw new IllegalArgumentException("Missing subject in JWT");
+    private Long parseUserId(Claims claims) {
+        String subject = claims.getSubject();
+        if (subject != null && !subject.isBlank()) {
+            return Long.valueOf(subject.trim());
         }
-        return Long.valueOf(subject.trim());
+
+        Object fallbackUserId = claims.get("userId");
+        if (fallbackUserId instanceof Number number) {
+            return number.longValue();
+        }
+        if (fallbackUserId instanceof String value && !value.isBlank()) {
+            return Long.valueOf(value.trim());
+        }
+
+        throw new IllegalArgumentException("Missing subject/userId in JWT");
     }
 
-    private Role parseRole(String rawRole) {
-        if (rawRole == null || rawRole.isBlank()) {
-            throw new IllegalArgumentException("Missing role in JWT");
+    private Role parseRole(Claims claims) {
+        Role roleFromRoleClaim = parseRoleValue(claims.get("role"));
+        if (roleFromRoleClaim != null) {
+            return roleFromRoleClaim;
         }
 
-        String normalized = rawRole.trim().toUpperCase();
+        Object authorities = claims.get("authorities");
+        if (authorities instanceof Collection<?> values) {
+            for (Object value : values) {
+                Role role = parseRoleValue(value);
+                if (role != null) {
+                    return role;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Missing role/authorities in JWT");
+    }
+
+    private Role parseRoleValue(Object rawRole) {
+        if (!(rawRole instanceof String roleValue) || roleValue.isBlank()) {
+            return null;
+        }
+
+        String normalized = roleValue.trim().toUpperCase();
         if (normalized.startsWith("ROLE_")) {
             normalized = normalized.substring("ROLE_".length());
         }
 
-        return Role.valueOf(normalized);
+        try {
+            return Role.valueOf(normalized);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 }
